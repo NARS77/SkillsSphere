@@ -10,63 +10,96 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
+        ("courses", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Lesson',
+            name="Lesson",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, default='')),
-                ('lesson_type', models.CharField(choices=[('VIDEO', 'Video'), ('ARTICLE', 'Text Article'), ('PDF', 'PDF Document'), ('RESOURCE', 'Downloadable File'), ('LINK', 'External Link')], default='VIDEO', max_length=20)),
-                ('duration', models.IntegerField(default=0, help_text='Estimated completion duration in minutes')),
-                ('video_url', models.CharField(blank=True, default='', max_length=500)),
-                ('content_text', models.TextField(blank=True, default='', help_text='Markdown content for Text Articles')),
-                ('content_file', models.FileField(blank=True, null=True, upload_to='lessons/files/')),
-                ('external_link', models.URLField(blank=True, default='', max_length=500)),
-                ('is_preview', models.BooleanField(default=False, help_text='Toggle if this is a free preview lesson')),
-                ('status', models.CharField(choices=[('DRAFT', 'Draft'), ('PUBLISHED', 'Published')], default='DRAFT', max_length=20)),
-                ('order', models.IntegerField(default=0)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, default="")),
+                (
+                    "lesson_type",
+                    models.CharField(
+                        choices=[
+                            ("VIDEO", "Video"),
+                            ("ARTICLE", "Text Article"),
+                            ("PDF", "PDF Document"),
+                            ("RESOURCE", "Downloadable File"),
+                            ("LINK", "External Link"),
+                        ],
+                        default="VIDEO",
+                        max_length=20,
+                    ),
+                ),
+                ("duration", models.IntegerField(default=0, help_text="Estimated completion duration in minutes")),
+                ("video_url", models.CharField(blank=True, default="", max_length=500)),
+                (
+                    "content_text",
+                    models.TextField(blank=True, default="", help_text="Markdown content for Text Articles"),
+                ),
+                ("content_file", models.FileField(blank=True, null=True, upload_to="lessons/files/")),
+                ("external_link", models.URLField(blank=True, default="", max_length=500)),
+                ("is_preview", models.BooleanField(default=False, help_text="Toggle if this is a free preview lesson")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("DRAFT", "Draft"), ("PUBLISHED", "Published")], default="DRAFT", max_length=20
+                    ),
+                ),
+                ("order", models.IntegerField(default=0)),
             ],
             options={
-                'ordering': ['order', 'created_at'],
+                "ordering": ["order", "created_at"],
             },
         ),
         migrations.CreateModel(
-            name='LessonResource',
+            name="LessonResource",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('file', models.FileField(upload_to='lessons/resources/')),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='resources', to='curriculum.lesson')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("file", models.FileField(upload_to="lessons/resources/")),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="resources", to="curriculum.lesson"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['created_at'],
+                "ordering": ["created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Section',
+            name="Section",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('order', models.IntegerField(default=0)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sections', to='courses.course')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("order", models.IntegerField(default=0)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="sections", to="courses.course"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order', 'created_at'],
+                "ordering": ["order", "created_at"],
             },
         ),
         migrations.AddField(
-            model_name='lesson',
-            name='section',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='curriculum.section'),
+            model_name="lesson",
+            name="section",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="lessons", to="curriculum.section"
+            ),
         ),
     ]

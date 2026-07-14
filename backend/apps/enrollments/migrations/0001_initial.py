@@ -11,58 +11,113 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
-        ('curriculum', '0001_initial'),
+        ("courses", "0001_initial"),
+        ("curriculum", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Enrollment',
+            name="Enrollment",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='courses.course')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="enrollments", to="courses.course"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'unique_together': {('student', 'course')},
+                "ordering": ["-created_at"],
+                "unique_together": {("student", "course")},
             },
         ),
         migrations.CreateModel(
-            name='UserProgress',
+            name="UserProgress",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_completed', models.BooleanField(default=False)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='progress_records', to='courses.course')),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='progress_records', to='curriculum.lesson')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='progress_records', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_completed", models.BooleanField(default=False)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="progress_records",
+                        to="courses.course",
+                    ),
+                ),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="progress_records",
+                        to="curriculum.lesson",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="progress_records",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'unique_together': {('student', 'lesson')},
+                "ordering": ["-created_at"],
+                "unique_together": {("student", "lesson")},
             },
         ),
         migrations.CreateModel(
-            name='WatchHistory',
+            name="WatchHistory",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('last_position', models.IntegerField(default=0, help_text='Watch position in seconds')),
-                ('completion_percentage', models.DecimalField(decimal_places=2, default=0.0, help_text='Watch completion percentage (0.0 to 100.0)', max_digits=5)),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='watch_histories', to='curriculum.lesson')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='watch_histories', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("last_position", models.IntegerField(default=0, help_text="Watch position in seconds")),
+                (
+                    "completion_percentage",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Watch completion percentage (0.0 to 100.0)",
+                        max_digits=5,
+                    ),
+                ),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="watch_histories",
+                        to="curriculum.lesson",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="watch_histories",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-updated_at'],
-                'unique_together': {('student', 'lesson')},
+                "ordering": ["-updated_at"],
+                "unique_together": {("student", "lesson")},
             },
         ),
     ]

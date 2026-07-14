@@ -1,12 +1,19 @@
-def render_email_template(title: str, heading: str, body_paragraphs: list, cta_text: str = None, cta_url: str = None) -> str:
+def render_email_template(
+    title: str, heading: str, body_paragraphs: list, cta_text: str = None, cta_url: str = None
+) -> str:
     """
     Renders a responsive HTML email template matching SkillSphere premium branding.
     """
-    paragraphs_html = "".join([f'<p style="margin: 0 0 16px; color: #475569; font-size: 15px; line-height: 1.6;">{p}</p>' for p in body_paragraphs])
-    
+    paragraphs_html = "".join(
+        [
+            f'<p style="margin: 0 0 16px; color: #475569; font-size: 15px; line-height: 1.6;">{p}</p>'
+            for p in body_paragraphs
+        ]
+    )
+
     cta_html = ""
     if cta_text and cta_url:
-        cta_html = f'''
+        cta_html = f"""
         <div style="margin: 32px 0; text-align: center;">
             <a href="{cta_url}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 12px 28px; font-weight: 600; text-decoration: none; border-radius: 8px; font-size: 14px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);">
                 {cta_text}
@@ -16,9 +23,9 @@ def render_email_template(title: str, heading: str, body_paragraphs: list, cta_t
                 <a href="{cta_url}" target="_blank" style="color: #4f46e5; text-decoration: underline;">{cta_url}</a>
             </p>
         </div>
-        '''
+        """
 
-    html_content = f'''<!DOCTYPE html>
+    html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -76,5 +83,5 @@ def render_email_template(title: str, heading: str, body_paragraphs: list, cta_t
     </table>
 </body>
 </html>
-'''
+"""
     return html_content

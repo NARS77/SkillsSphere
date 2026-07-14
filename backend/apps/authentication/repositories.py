@@ -2,10 +2,12 @@ from typing import Optional
 from apps.core.repositories import BaseRepository
 from .models import User, Profile
 
+
 class UserRepository(BaseRepository[User]):
     """
     Repository for managing User database operations.
     """
+
     def __init__(self):
         super().__init__(User)
 
@@ -26,6 +28,7 @@ class ProfileRepository(BaseRepository[Profile]):
     """
     Repository for managing Profile database operations.
     """
+
     def __init__(self):
         super().__init__(Profile)
 

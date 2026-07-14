@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from apps.courses.models import Course
 from .models import WishlistItem
 
+
 class WishlistService:
     @staticmethod
     def toggle_wishlist(student, course_id):

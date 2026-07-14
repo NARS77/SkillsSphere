@@ -8,10 +8,12 @@ from .repositories import SectionRepository, LessonRepository, LessonResourceRep
 
 User = get_user_model()
 
+
 class CurriculumService:
     """
     Service coordinating CRUD, reordering, duplicating and resource management for course curricula.
     """
+
     def __init__(self):
         self.section_repo = SectionRepository()
         self.lesson_repo = LessonRepository()
@@ -22,7 +24,7 @@ class CurriculumService:
         Raises AuthorizationException if the user is not the instructor of the course
         and is not an administrator.
         """
-        if user.is_superuser or user.role == 'ADMIN':
+        if user.is_superuser or user.role == "ADMIN":
             return
 
         try:
@@ -48,20 +50,16 @@ class CurriculumService:
         self._verify_course_ownership(course_id, user)
 
         # Calculate next order index
-        max_order = self.section_repo.get_course_sections(course_id).aggregate(Max('order'))['order__max']
+        max_order = self.section_repo.get_course_sections(course_id).aggregate(Max("order"))["order__max"]
         next_order = (max_order or 0) + 1
 
-        return self.section_repo.create(
-            course_id=course_id,
-            title=title,
-            order=next_order
-        )
+        return self.section_repo.create(course_id=course_id, title=title, order=next_order)
 
     def update_section(self, section_id: Any, title: str, user: User) -> Section:
         section = self.section_repo.get_by_id(section_id)
         if not section:
             raise NotFoundException("Section not found.")
-            
+
         self._verify_section_ownership(section, user)
         return self.section_repo.update(section, title=title)
 
@@ -69,7 +67,7 @@ class CurriculumService:
         section = self.section_repo.get_by_id(section_id)
         if not section:
             raise NotFoundException("Section not found.")
-            
+
         self._verify_section_ownership(section, user)
         self.section_repo.delete(section)
 
@@ -84,23 +82,19 @@ class CurriculumService:
             section = Section.objects.get(id=section_id)
         except Section.DoesNotExist:
             raise NotFoundException("Section not found.")
-            
+
         self._verify_section_ownership(section, user)
 
         # Calculate next order index
-        max_order = self.lesson_repo.get_section_lessons(section_id).aggregate(Max('order'))['order__max']
+        max_order = self.lesson_repo.get_section_lessons(section_id).aggregate(Max("order"))["order__max"]
         next_order = (max_order or 0) + 1
 
-        status_val = data.pop('status', Lesson.Status.DRAFT)
-        lesson = self.lesson_repo.model(
-            section=section,
-            order=next_order,
-            status=status_val,
-            **data
-        )
+        status_val = data.pop("status", Lesson.Status.DRAFT)
+        lesson = self.lesson_repo.model(section=section, order=next_order, status=status_val, **data)
         self.lesson_repo.save(lesson)
         if lesson.lesson_type == Lesson.LessonType.VIDEO and lesson.content_file:
             from .tasks import process_video_task
+
             process_video_task.delay(lesson.id)
         return lesson
 
@@ -108,15 +102,16 @@ class CurriculumService:
         lesson = self.lesson_repo.get_by_id(lesson_id)
         if not lesson:
             raise NotFoundException("Lesson not found.")
-            
+
         self._verify_lesson_ownership(lesson, user)
 
         for field, value in data.items():
             setattr(lesson, field, value)
-            
+
         self.lesson_repo.save(lesson)
         if lesson.lesson_type == Lesson.LessonType.VIDEO and lesson.content_file:
             from .tasks import process_video_task
+
             process_video_task.delay(lesson.id)
         return lesson
 
@@ -124,7 +119,7 @@ class CurriculumService:
         lesson = self.lesson_repo.get_by_id(lesson_id)
         if not lesson:
             raise NotFoundException("Lesson not found.")
-            
+
         self._verify_lesson_ownership(lesson, user)
         self.lesson_repo.delete(lesson)
 
@@ -132,11 +127,11 @@ class CurriculumService:
         lesson = self.lesson_repo.get_by_id(lesson_id)
         if not lesson:
             raise NotFoundException("Lesson not found.")
-            
+
         self._verify_lesson_ownership(lesson, user)
 
         # Calculate next order index
-        max_order = self.lesson_repo.get_section_lessons(lesson.section_id).aggregate(Max('order'))['order__max']
+        max_order = self.lesson_repo.get_section_lessons(lesson.section_id).aggregate(Max("order"))["order__max"]
         next_order = (max_order or 0) + 1
 
         duplicated_lesson = Lesson(
@@ -151,7 +146,7 @@ class CurriculumService:
             external_link=lesson.external_link,
             is_preview=lesson.is_preview,
             status=Lesson.Status.DRAFT,
-            order=next_order
+            order=next_order,
         )
         self.lesson_repo.save(duplicated_lesson)
         return duplicated_lesson
@@ -161,7 +156,7 @@ class CurriculumService:
             section = Section.objects.get(id=section_id)
         except Section.DoesNotExist:
             raise NotFoundException("Section not found.")
-            
+
         self._verify_section_ownership(section, user)
         self.lesson_repo.reorder_lessons(section_id, lesson_ids)
 
@@ -171,19 +166,15 @@ class CurriculumService:
         lesson = self.lesson_repo.get_by_id(lesson_id)
         if not lesson:
             raise NotFoundException("Lesson not found.")
-            
+
         self._verify_lesson_ownership(lesson, user)
 
-        return self.resource_repo.create(
-            lesson=lesson,
-            title=title,
-            file=file_obj
-        )
+        return self.resource_repo.create(lesson=lesson, title=title, file=file_obj)
 
     def delete_resource(self, resource_id: Any, user: User) -> None:
         resource = self.resource_repo.get_by_id(resource_id)
         if not resource:
             raise NotFoundException("Resource not found.")
-            
+
         self._verify_resource_ownership(resource, user)
         self.resource_repo.delete(resource)

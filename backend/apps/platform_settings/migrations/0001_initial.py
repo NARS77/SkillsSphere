@@ -8,21 +8,20 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='PlatformSetting',
+            name="PlatformSetting",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('key', models.CharField(max_length=100, unique=True)),
-                ('value', models.JSONField(default=dict)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("key", models.CharField(max_length=100, unique=True)),
+                ("value", models.JSONField(default=dict)),
             ],
             options={
-                'ordering': ['key'],
+                "ordering": ["key"],
             },
         ),
     ]

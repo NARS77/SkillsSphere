@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from .models import Certificate
 from .serializers import CertificateSerializer
 
+
 class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
     # AllowAny for verification lookup, but standard listing is authenticated
     permission_classes = [IsAuthenticated]
@@ -14,11 +15,11 @@ class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'INSTRUCTOR':
+        if user.role == "INSTRUCTOR":
             return Certificate.objects.filter(course__instructor=user)
         return Certificate.objects.filter(student=user)
 
-    @action(detail=False, methods=['get'], url_path='verify/(?P<cert_id>[^/.]+)', permission_classes=[AllowAny])
+    @action(detail=False, methods=["get"], url_path="verify/(?P<cert_id>[^/.]+)", permission_classes=[AllowAny])
     def verify_certificate(self, request, cert_id=None):
         certificate = get_object_or_404(Certificate, certificate_id=cert_id)
         serializer = CertificateSerializer(certificate)

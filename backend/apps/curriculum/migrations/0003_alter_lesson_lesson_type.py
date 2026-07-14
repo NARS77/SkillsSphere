@@ -6,13 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('curriculum', '0002_alter_lesson_lesson_type'),
+        ("curriculum", "0002_alter_lesson_lesson_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='lesson',
-            name='lesson_type',
-            field=models.CharField(choices=[('VIDEO', 'Video'), ('ARTICLE', 'Text Article'), ('PDF', 'PDF Document'), ('RESOURCE', 'Downloadable File'), ('LINK', 'External Link'), ('LIVE', 'Live Session'), ('CODING', 'Interactive Coding Exercise'), ('QUIZ', 'Quiz'), ('ASSIGNMENT', 'Assignment')], default='VIDEO', max_length=20),
+            model_name="lesson",
+            name="lesson_type",
+            field=models.CharField(
+                choices=[
+                    ("VIDEO", "Video"),
+                    ("ARTICLE", "Text Article"),
+                    ("PDF", "PDF Document"),
+                    ("RESOURCE", "Downloadable File"),
+                    ("LINK", "External Link"),
+                    ("LIVE", "Live Session"),
+                    ("CODING", "Interactive Coding Exercise"),
+                    ("QUIZ", "Quiz"),
+                    ("ASSIGNMENT", "Assignment"),
+                ],
+                default="VIDEO",
+                max_length=20,
+            ),
         ),
     ]

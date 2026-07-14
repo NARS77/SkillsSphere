@@ -6,6 +6,7 @@ from .models import WishlistItem
 from .serializers import WishlistItemSerializer
 from .services import WishlistService
 
+
 class WishlistItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = WishlistItemSerializer
@@ -16,10 +17,10 @@ class WishlistItemViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(student=self.request.user)
 
-    @action(detail=False, methods=['post'], url_path='toggle')
+    @action(detail=False, methods=["post"], url_path="toggle")
     def toggle(self, request):
-        course_id = request.data.get('course_id')
+        course_id = request.data.get("course_id")
         if not course_id:
-            return Response({'error': 'course_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "course_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         is_wishlisted = WishlistService.toggle_wishlist(request.user, course_id)
-        return Response({'wishlisted': is_wishlisted}, status=status.HTTP_200_OK)
+        return Response({"wishlisted": is_wishlisted}, status=status.HTTP_200_OK)

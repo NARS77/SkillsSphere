@@ -10,25 +10,44 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('orders', '0001_initial'),
+        ("orders", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('payment_provider', models.CharField(choices=[('STRIPE', 'Stripe'), ('RAZORPAY', 'Razorpay'), ('MOCK', 'Mock Gateway')], default='MOCK', max_length=20)),
-                ('transaction_id', models.CharField(max_length=255, unique=True)),
-                ('status', models.CharField(choices=[('SUCCESS', 'Success'), ('FAILED', 'Failed'), ('REFUNDED', 'Refunded')], default='SUCCESS', max_length=20)),
-                ('receipt_pdf', models.FileField(blank=True, null=True, upload_to='payments/receipts/')),
-                ('order', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment', to='orders.order')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "payment_provider",
+                    models.CharField(
+                        choices=[("STRIPE", "Stripe"), ("RAZORPAY", "Razorpay"), ("MOCK", "Mock Gateway")],
+                        default="MOCK",
+                        max_length=20,
+                    ),
+                ),
+                ("transaction_id", models.CharField(max_length=255, unique=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("SUCCESS", "Success"), ("FAILED", "Failed"), ("REFUNDED", "Refunded")],
+                        default="SUCCESS",
+                        max_length=20,
+                    ),
+                ),
+                ("receipt_pdf", models.FileField(blank=True, null=True, upload_to="payments/receipts/")),
+                (
+                    "order",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="payment", to="orders.order"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'abstract': False,
+                "ordering": ["-created_at"],
+                "abstract": False,
             },
         ),
     ]

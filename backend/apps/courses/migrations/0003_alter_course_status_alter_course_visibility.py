@@ -6,18 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0002_savedsearch'),
+        ("courses", "0002_savedsearch"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='course',
-            name='status',
-            field=models.CharField(choices=[('DRAFT', 'Draft'), ('PUBLISHED', 'Published'), ('ARCHIVED', 'Archived')], db_index=True, default='DRAFT', max_length=20),
+            model_name="course",
+            name="status",
+            field=models.CharField(
+                choices=[("DRAFT", "Draft"), ("PUBLISHED", "Published"), ("ARCHIVED", "Archived")],
+                db_index=True,
+                default="DRAFT",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='course',
-            name='visibility',
-            field=models.CharField(choices=[('PUBLIC', 'Public'), ('PRIVATE', 'Private')], db_index=True, default='PUBLIC', max_length=20),
+            model_name="course",
+            name="visibility",
+            field=models.CharField(
+                choices=[("PUBLIC", "Public"), ("PRIVATE", "Private")], db_index=True, default="PUBLIC", max_length=20
+            ),
         ),
     ]

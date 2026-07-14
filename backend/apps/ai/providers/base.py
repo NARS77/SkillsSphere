@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Generator, Dict, Any
 
+
 class AIProvider(ABC):
     """
     Abstract Base Class outlining standard methods for all LLM providers (Gemini, OpenAI, Mock, etc.).
     """
+
     @abstractmethod
     def generate(self, prompt: str, system_instruction: str = None, **kwargs) -> Dict[str, Any]:
         """
@@ -18,7 +20,9 @@ class AIProvider(ABC):
         pass
 
     @abstractmethod
-    def generate_stream(self, prompt: str, system_instruction: str = None, **kwargs) -> Generator[Dict[str, Any], None, None]:
+    def generate_stream(
+        self, prompt: str, system_instruction: str = None, **kwargs
+    ) -> Generator[Dict[str, Any], None, None]:
         """
         Yields text chunks and final metadata counts in a streaming generation:
         Yields:

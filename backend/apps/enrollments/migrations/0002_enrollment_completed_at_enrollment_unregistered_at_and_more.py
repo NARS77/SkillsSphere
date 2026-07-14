@@ -9,44 +9,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('curriculum', '0002_alter_lesson_lesson_type'),
-        ('enrollments', '0001_initial'),
+        ("curriculum", "0002_alter_lesson_lesson_type"),
+        ("enrollments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='enrollment',
-            name='completed_at',
+            model_name="enrollment",
+            name="completed_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='enrollment',
-            name='unregistered_at',
+            model_name="enrollment",
+            name="unregistered_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='watchhistory',
-            name='device',
-            field=models.CharField(default='Web Browser', max_length=100),
+            model_name="watchhistory",
+            name="device",
+            field=models.CharField(default="Web Browser", max_length=100),
         ),
         migrations.AddField(
-            model_name='watchhistory',
-            name='watch_time',
-            field=models.IntegerField(default=0, help_text='Total watch time in seconds'),
+            model_name="watchhistory",
+            name="watch_time",
+            field=models.IntegerField(default=0, help_text="Total watch time in seconds"),
         ),
         migrations.CreateModel(
-            name='Bookmark',
+            name="Bookmark",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to='curriculum.lesson')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="bookmarks", to="curriculum.lesson"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bookmarks",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'unique_together': {('student', 'lesson')},
+                "ordering": ["-created_at"],
+                "unique_together": {("student", "lesson")},
             },
         ),
     ]

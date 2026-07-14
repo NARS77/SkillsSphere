@@ -4,24 +4,20 @@ from apps.courses.models import Course
 from apps.core.models import Notification
 from .models import DiscussionThread, DiscussionReply, ThreadVote, ReplyVote
 
+
 class DiscussionService:
     @staticmethod
     def create_thread(course_id, author, title, content):
         course = get_object_or_404(Course, id=course_id)
-        thread = DiscussionThread.objects.create(
-            course=course,
-            author=author,
-            title=title,
-            content=content
-        )
-        
+        thread = DiscussionThread.objects.create(course=course, author=author, title=title, content=content)
+
         # Notify instructor
         if course.instructor != author:
             Notification.objects.create(
                 user=course.instructor,
                 title="New Discussion Thread",
                 message=f"{author.username} started a discussion: '{title}' in {course.title}.",
-                notification_type="NEW_DISCUSSION"
+                notification_type="NEW_DISCUSSION",
             )
         return thread
 
@@ -31,19 +27,15 @@ class DiscussionService:
         if thread.is_locked:
             raise ValidationException("This thread is locked and cannot receive replies.")
 
-        reply = DiscussionReply.objects.create(
-            thread=thread,
-            author=author,
-            content=content
-        )
-        
+        reply = DiscussionReply.objects.create(thread=thread, author=author, content=content)
+
         # Notify thread author
         if thread.author != author:
             Notification.objects.create(
                 user=thread.author,
                 title="New Reply to Discussion",
                 message=f"{author.username} replied to your thread: '{thread.title}'.",
-                notification_type="DISCUSSION_REPLY"
+                notification_type="DISCUSSION_REPLY",
             )
         return reply
 

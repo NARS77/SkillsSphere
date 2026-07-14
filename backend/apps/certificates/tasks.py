@@ -7,6 +7,7 @@ from .services import CertificateService
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 @shared_task(name="certificates.generate_certificate_task")
 def generate_certificate_task(student_id, course_id):
     """

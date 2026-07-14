@@ -6,27 +6,19 @@ from .services import MessagingService
 
 User = get_user_model()
 
+
 class MessagingServiceTestCase(TestCase):
     def setUp(self):
         self.student = User.objects.create_user(
-            username='student1',
-            email='student1@test.com',
-            password='password123',
-            role=User.Role.STUDENT
+            username="student1", email="student1@test.com", password="password123", role=User.Role.STUDENT
         )
         self.instructor = User.objects.create_user(
-            username='instructor1',
-            email='instructor1@test.com',
-            password='password123',
-            role=User.Role.INSTRUCTOR
+            username="instructor1", email="instructor1@test.com", password="password123", role=User.Role.INSTRUCTOR
         )
 
     def test_start_conversation_with_non_instructor(self):
         other_student = User.objects.create_user(
-            username='student2',
-            email='student2@test.com',
-            password='password123',
-            role=User.Role.STUDENT
+            username="student2", email="student2@test.com", password="password123", role=User.Role.STUDENT
         )
         with self.assertRaises(ValidationException) as context:
             MessagingService.get_or_create_conversation(self.student, other_student.id)
@@ -34,7 +26,7 @@ class MessagingServiceTestCase(TestCase):
 
     def test_send_message_and_read_receipts(self):
         conv = MessagingService.get_or_create_conversation(self.student, self.instructor.id)
-        
+
         # Student sends message
         msg = MessagingService.send_message(self.student, conv.id, "Hello teacher!")
         self.assertEqual(msg.content, "Hello teacher!")

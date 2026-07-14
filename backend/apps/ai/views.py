@@ -20,13 +20,14 @@ from .services.study_planner import AIStudyPlanner
 from .services.recommendation_service import AIRecommendationService
 from .services.moderation_service import AIModerationService
 
+
 class AITutorView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        course_id = request.data.get('course_id')
-        prompt = request.data.get('prompt')
-        session_id = request.data.get('session_id')
+        course_id = request.data.get("course_id")
+        prompt = request.data.get("prompt")
+        session_id = request.data.get("session_id")
 
         if not course_id or not prompt:
             raise ValidationException("course_id and prompt parameters are required.")
@@ -52,39 +53,39 @@ class AITutorView(APIView):
 
         # 3. Stream Response via SSE
         gateway = AIGateway()
-        
+
         # Append query to local DB thread context
-        convo.history.append({'role': 'user', 'content': prompt})
+        convo.history.append({"role": "user", "content": prompt})
         convo.save()
 
         def stream_generator():
             full_response = ""
             # Yield session info first
             yield f"data: {json.dumps({'session_id': str(convo.session_id)})}\n\n"
-            
+
             # Stream tokens
             for chunk in gateway.execute_stream(
                 user=request.user,
                 course=course,
-                feature_name='ai_tutor',
+                feature_name="ai_tutor",
                 prompt=prompt,
-                system_instruction=system_instruction
+                system_instruction=system_instruction,
             ):
                 full_response += chunk
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
 
             # Save finished response back to DB
-            convo.history.append({'role': 'model', 'content': full_response})
+            convo.history.append({"role": "model", "content": full_response})
             convo.save()
 
-        return StreamingHttpResponse(stream_generator(), content_type='text/event-stream')
+        return StreamingHttpResponse(stream_generator(), content_type="text/event-stream")
 
 
 class AICourseBuilderView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        description = request.data.get('description')
+        description = request.data.get("description")
         if not description:
             raise ValidationException("description is required.")
 
@@ -97,8 +98,8 @@ class AIQuizGeneratorView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        lesson_id = request.data.get('lesson_id')
-        difficulty = request.data.get('difficulty', 'medium')
+        lesson_id = request.data.get("lesson_id")
+        difficulty = request.data.get("difficulty", "medium")
 
         if not lesson_id:
             raise ValidationException("lesson_id is required.")
@@ -115,7 +116,7 @@ class AIQuizGeneratorView(APIView):
             course=lesson.section.course,
             lesson_title=lesson.title,
             lesson_content=content,
-            difficulty=difficulty
+            difficulty=difficulty,
         )
         return Response(questions, status=status.HTTP_200_OK)
 
@@ -124,8 +125,8 @@ class AIAssignmentEvaluatorView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        assignment_id = request.data.get('assignment_id')
-        submission_text = request.data.get('submission_text')
+        assignment_id = request.data.get("assignment_id")
+        submission_text = request.data.get("submission_text")
 
         if not assignment_id or not submission_text:
             raise ValidationException("assignment_id and submission_text are required.")
@@ -141,16 +142,16 @@ class AIAssignmentEvaluatorView(APIView):
             course=assignment.lesson.section.course,
             assignment_title=assignment.lesson.title,
             assignment_desc=assignment.description,
-            submission_text=submission_text
+            submission_text=submission_text,
         )
-        return Response({'feedback': feedback}, status=status.HTTP_200_OK)
+        return Response({"feedback": feedback}, status=status.HTTP_200_OK)
 
 
 class AIFlashcardsView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        lesson_id = request.data.get('lesson_id')
+        lesson_id = request.data.get("lesson_id")
         if not lesson_id:
             raise ValidationException("lesson_id is required.")
 
@@ -162,10 +163,7 @@ class AIFlashcardsView(APIView):
         generator = AIFlashcardGenerator()
         content = lesson.content_text or lesson.description
         cards = generator.generate_flashcards(
-            user=request.user,
-            course=lesson.section.course,
-            lesson_title=lesson.title,
-            lesson_content=content
+            user=request.user, course=lesson.section.course, lesson_title=lesson.title, lesson_content=content
         )
         return Response(cards, status=status.HTTP_200_OK)
 
@@ -174,8 +172,8 @@ class AIStudyPlannerView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        target_hours = int(request.data.get('target_hours', 5))
-        completion_date = request.data.get('completion_date', '2026-12-31')
+        target_hours = int(request.data.get("target_hours", 5))
+        completion_date = request.data.get("completion_date", "2026-12-31")
 
         planner = AIStudyPlanner()
         schedule = planner.generate_schedule(request.user, target_hours, completion_date)
@@ -197,22 +195,26 @@ class AIUsageAnalyticsView(APIView):
     def get(self, request):
         # Calculate usage summary metrics
         usages = TokenUsage.objects.all()
-        if request.user.role != 'ADMIN':
+        if request.user.role != "ADMIN":
             usages = usages.filter(user=request.user)
 
         from django.db.models import Sum, Count
+
         summary = usages.aggregate(
-            total_requests=Count('id'),
-            prompt_tokens=Sum('prompt_tokens'),
-            completion_tokens=Sum('completion_tokens'),
-            total_tokens=Sum('total_tokens'),
-            estimated_cost=Sum('estimated_cost')
+            total_requests=Count("id"),
+            prompt_tokens=Sum("prompt_tokens"),
+            completion_tokens=Sum("completion_tokens"),
+            total_tokens=Sum("total_tokens"),
+            estimated_cost=Sum("estimated_cost"),
         )
 
-        return Response({
-            'total_requests': summary['total_requests'] or 0,
-            'prompt_tokens': summary['prompt_tokens'] or 0,
-            'completion_tokens': summary['completion_tokens'] or 0,
-            'total_tokens': summary['total_tokens'] or 0,
-            'estimated_cost': float(summary['estimated_cost'] or 0.0)
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "total_requests": summary["total_requests"] or 0,
+                "prompt_tokens": summary["prompt_tokens"] or 0,
+                "completion_tokens": summary["completion_tokens"] or 0,
+                "total_tokens": summary["total_tokens"] or 0,
+                "estimated_cost": float(summary["estimated_cost"] or 0.0),
+            },
+            status=status.HTTP_200_OK,
+        )

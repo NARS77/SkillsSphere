@@ -2,8 +2,9 @@ class AIModerationService:
     """
     Moderation system scanning discussion threads and course reviews for spam, toxicity, or abuse.
     """
+
     def __init__(self):
-        self.toxic_keywords = ['toxic', 'abuse', 'spam', 'scam', 'hack', 'fuck', 'shit', 'idiot']
+        self.toxic_keywords = ["toxic", "abuse", "spam", "scam", "hack", "fuck", "shit", "idiot"]
 
     def inspect_content(self, text: str) -> dict:
         text_lower = text.lower()
@@ -22,8 +23,8 @@ class AIModerationService:
             reasons.append("Content too short (potential spam)")
 
         return {
-            'flagged': flagged,
-            'confidence_score': 0.95 if flagged else 0.05,
-            'reasons': reasons,
-            'moderated_text': text
+            "flagged": flagged,
+            "confidence_score": 0.95 if flagged else 0.05,
+            "reasons": reasons,
+            "moderated_text": text,
         }

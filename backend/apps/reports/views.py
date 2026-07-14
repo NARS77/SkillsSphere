@@ -6,6 +6,7 @@ from .models import Payout
 from .serializers import PayoutSerializer
 from .services import ReportService
 
+
 class PayoutViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Payout.objects.all()
@@ -13,13 +14,13 @@ class PayoutViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role == "ADMIN":
             return Payout.objects.all()
         return Payout.objects.filter(instructor=user)
 
-    @action(detail=False, methods=['get'], url_path='instructor-revenue')
+    @action(detail=False, methods=["get"], url_path="instructor-revenue")
     def instructor_revenue(self, request):
-        if request.user.role != 'INSTRUCTOR':
-            return Response({'error': 'Only instructors can access revenue details.'}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role != "INSTRUCTOR":
+            return Response({"error": "Only instructors can access revenue details."}, status=status.HTTP_403_FORBIDDEN)
         stats = ReportService.get_instructor_revenue_stats(request.user)
         return Response(stats, status=status.HTTP_200_OK)

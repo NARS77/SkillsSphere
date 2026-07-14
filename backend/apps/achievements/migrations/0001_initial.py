@@ -16,32 +16,57 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Badge',
+            name="Badge",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField()),
-                ('icon', models.CharField(default='Trophy', help_text='Lucide-react icon name', max_length=50)),
-                ('badge_type', models.CharField(choices=[('FIRST_COURSE', 'First Course Completed'), ('STREAK_7', '7-Day Learning Streak'), ('QUIZ_MASTER', 'Quiz Master'), ('ASSIGNMENT_CHAMPION', 'Assignment Champion'), ('TOP_PERFORMER', 'Top Performer')], max_length=50, unique=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField()),
+                ("icon", models.CharField(default="Trophy", help_text="Lucide-react icon name", max_length=50)),
+                (
+                    "badge_type",
+                    models.CharField(
+                        choices=[
+                            ("FIRST_COURSE", "First Course Completed"),
+                            ("STREAK_7", "7-Day Learning Streak"),
+                            ("QUIZ_MASTER", "Quiz Master"),
+                            ("ASSIGNMENT_CHAMPION", "Assignment Champion"),
+                            ("TOP_PERFORMER", "Top Performer"),
+                        ],
+                        max_length=50,
+                        unique=True,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'abstract': False,
+                "ordering": ["-created_at"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='UserAchievement',
+            name="UserAchievement",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('unlocked_at', models.DateTimeField(auto_now_add=True)),
-                ('badge', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='unlocks', to='achievements.badge')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='achievements', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("unlocked_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "badge",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="unlocks", to="achievements.badge"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="achievements",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-unlocked_at'],
-                'unique_together': {('student', 'badge')},
+                "ordering": ["-unlocked_at"],
+                "unique_together": {("student", "badge")},
             },
         ),
     ]

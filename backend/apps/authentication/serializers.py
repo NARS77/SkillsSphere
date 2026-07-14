@@ -2,11 +2,22 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User, Profile
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'role', 'is_verified', 'first_name', 'last_name', 'terms_accepted', 'terms_accepted_at')
-        read_only_fields = ('id', 'is_verified', 'terms_accepted', 'terms_accepted_at')
+        fields = (
+            "id",
+            "email",
+            "username",
+            "role",
+            "is_verified",
+            "first_name",
+            "last_name",
+            "terms_accepted",
+            "terms_accepted_at",
+        )
+        read_only_fields = ("id", "is_verified", "terms_accepted", "terms_accepted_at")
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -15,8 +26,8 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     role = serializers.ChoiceField(choices=User.Role.choices, default=User.Role.STUDENT)
     accept_terms = serializers.BooleanField(required=True)
-    terms_version = serializers.CharField(max_length=20, required=False, default='v1.0')
-    privacy_policy_version = serializers.CharField(max_length=20, required=False, default='v1.0')
+    terms_version = serializers.CharField(max_length=20, required=False, default="v1.0")
+    privacy_policy_version = serializers.CharField(max_length=20, required=False, default="v1.0")
 
     def validate_accept_terms(self, value):
         if not value:
@@ -35,12 +46,25 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'id', 'user', 'headline', 'bio', 'avatar', 'cover_image',
-            'website_url', 'linkedin_url', 'github_url', 'twitter_url',
-            'display_name', 'country', 'timezone', 'preferred_language', 'occupation',
-            'xp', 'streak'
+            "id",
+            "user",
+            "headline",
+            "bio",
+            "avatar",
+            "cover_image",
+            "website_url",
+            "linkedin_url",
+            "github_url",
+            "twitter_url",
+            "display_name",
+            "country",
+            "timezone",
+            "preferred_language",
+            "occupation",
+            "xp",
+            "streak",
         )
-        read_only_fields = ('id', 'user', 'xp', 'streak')
+        read_only_fields = ("id", "user", "xp", "streak")
 
 
 class ProfileUpdateSerializer(serializers.Serializer):
@@ -59,4 +83,3 @@ class ProfileUpdateSerializer(serializers.Serializer):
     timezone = serializers.CharField(max_length=100, required=False)
     preferred_language = serializers.CharField(max_length=20, required=False)
     occupation = serializers.CharField(max_length=100, required=False, allow_blank=True)
-

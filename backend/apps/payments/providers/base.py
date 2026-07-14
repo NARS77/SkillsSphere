@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 
+
 class BasePaymentProvider(ABC):
     """
     Abstract Base Class representing a payment gateway integration interface.
     """
+
     @abstractmethod
     def initiate_payment(self, amount: float, currency: str, order_id: str) -> dict:
         """

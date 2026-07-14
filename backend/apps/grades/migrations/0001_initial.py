@@ -11,30 +11,69 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
-        ('enrollments', '0002_enrollment_completed_at_enrollment_unregistered_at_and_more'),
+        ("courses", "0001_initial"),
+        ("enrollments", "0002_enrollment_completed_at_enrollment_unregistered_at_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GradebookEntry',
+            name="GradebookEntry",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('quiz_average', models.DecimalField(decimal_places=2, default=0.0, help_text='Average score percentage of all quizzes', max_digits=5)),
-                ('assignment_average', models.DecimalField(decimal_places=2, default=0.0, help_text='Average score percentage of all assignments', max_digits=5)),
-                ('overall_score', models.DecimalField(decimal_places=2, default=0.0, help_text='Weighted overall percentage score', max_digits=5)),
-                ('grade_letter', models.CharField(default='F', max_length=5)),
-                ('passed', models.BooleanField(default=False)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gradebook_entries', to='courses.course')),
-                ('enrollment', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='gradebook_entry', to='enrollments.enrollment')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gradebook_entries', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "quiz_average",
+                    models.DecimalField(
+                        decimal_places=2, default=0.0, help_text="Average score percentage of all quizzes", max_digits=5
+                    ),
+                ),
+                (
+                    "assignment_average",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Average score percentage of all assignments",
+                        max_digits=5,
+                    ),
+                ),
+                (
+                    "overall_score",
+                    models.DecimalField(
+                        decimal_places=2, default=0.0, help_text="Weighted overall percentage score", max_digits=5
+                    ),
+                ),
+                ("grade_letter", models.CharField(default="F", max_length=5)),
+                ("passed", models.BooleanField(default=False)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="gradebook_entries",
+                        to="courses.course",
+                    ),
+                ),
+                (
+                    "enrollment",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="gradebook_entry",
+                        to="enrollments.enrollment",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="gradebook_entries",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'abstract': False,
+                "ordering": ["-created_at"],
+                "abstract": False,
             },
         ),
     ]

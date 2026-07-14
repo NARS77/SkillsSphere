@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 
 logger = logging.getLogger(__name__)
 
+
 class BaseStorageProvider(ABC):
     @abstractmethod
     def save_file(self, file_name: str, content: bytes) -> str:
@@ -40,21 +41,18 @@ class LocalStorageProvider(BaseStorageProvider):
 class S3StorageProvider(BaseStorageProvider):
     def __init__(self):
         import boto3
+
         self.s3_client = boto3.client(
-            's3',
+            "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME
+            region_name=settings.AWS_S3_REGION_NAME,
         )
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
     def save_file(self, file_name: str, content: bytes) -> str:
         try:
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=file_name,
-                Body=content
-            )
+            self.s3_client.put_object(Bucket=self.bucket_name, Key=file_name, Body=content)
             return f"https://{self.bucket_name}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{file_name}"
         except Exception as e:
             logger.error(f"S3 Save failure: {e}")
@@ -63,9 +61,7 @@ class S3StorageProvider(BaseStorageProvider):
     def generate_presigned_upload_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
             response = self.s3_client.generate_presigned_url(
-                'put_object',
-                Params={'Bucket': self.bucket_name, 'Key': file_name},
-                ExpiresIn=expiration
+                "put_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
             )
             return response
         except Exception as e:
@@ -75,9 +71,7 @@ class S3StorageProvider(BaseStorageProvider):
     def generate_presigned_download_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
             response = self.s3_client.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': self.bucket_name, 'Key': file_name},
-                ExpiresIn=expiration
+                "get_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
             )
             return response
         except Exception as e:
@@ -88,20 +82,21 @@ class S3StorageProvider(BaseStorageProvider):
 class R2StorageProvider(BaseStorageProvider):
     def __init__(self):
         import boto3
-        endpoint_url = os.getenv('R2_ENDPOINT_URL')
+
+        endpoint_url = os.getenv("R2_ENDPOINT_URL")
         self.s3_client = boto3.client(
-            's3',
+            "s3",
             endpoint_url=endpoint_url,
-            aws_access_key_id=os.getenv('R2_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('R2_SECRET_ACCESS_KEY'),
-            region_name='auto'
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+            region_name="auto",
         )
-        self.bucket_name = os.getenv('R2_BUCKET_NAME', 'skillsphere')
+        self.bucket_name = os.getenv("R2_BUCKET_NAME", "skillsphere")
 
     def save_file(self, file_name: str, content: bytes) -> str:
         try:
             self.s3_client.put_object(Bucket=self.bucket_name, Key=file_name, Body=content)
-            public_url = os.getenv('R2_PUBLIC_URL', 'https://pub-r2.skillsphere.com')
+            public_url = os.getenv("R2_PUBLIC_URL", "https://pub-r2.skillsphere.com")
             return f"{public_url.rstrip('/')}/{file_name}"
         except Exception as e:
             logger.error(f"R2 Save failure: {e}")
@@ -109,13 +104,17 @@ class R2StorageProvider(BaseStorageProvider):
 
     def generate_presigned_upload_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
-            return self.s3_client.generate_presigned_url('put_object', Params={'Bucket': self.bucket_name, 'Key': file_name}, ExpiresIn=expiration)
+            return self.s3_client.generate_presigned_url(
+                "put_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
+            )
         except Exception:
             return ""
 
     def generate_presigned_download_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
-            return self.s3_client.generate_presigned_url('get_object', Params={'Bucket': self.bucket_name, 'Key': file_name}, ExpiresIn=expiration)
+            return self.s3_client.generate_presigned_url(
+                "get_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
+            )
         except Exception:
             return ""
 
@@ -123,20 +122,21 @@ class R2StorageProvider(BaseStorageProvider):
 class MinIOStorageProvider(BaseStorageProvider):
     def __init__(self):
         import boto3
-        endpoint_url = os.getenv('MINIO_ENDPOINT_URL', 'http://localhost:9000')
+
+        endpoint_url = os.getenv("MINIO_ENDPOINT_URL", "http://localhost:9000")
         self.s3_client = boto3.client(
-            's3',
+            "s3",
             endpoint_url=endpoint_url,
-            aws_access_key_id=os.getenv('MINIO_ROOT_USER', 'minioadmin'),
-            aws_secret_access_key=os.getenv('MINIO_ROOT_PASSWORD', 'minioadmin'),
-            region_name='us-east-1'
+            aws_access_key_id=os.getenv("MINIO_ROOT_USER", "minioadmin"),
+            aws_secret_access_key=os.getenv("MINIO_ROOT_PASSWORD", "minioadmin"),
+            region_name="us-east-1",
         )
-        self.bucket_name = os.getenv('MINIO_BUCKET_NAME', 'skillsphere')
+        self.bucket_name = os.getenv("MINIO_BUCKET_NAME", "skillsphere")
 
     def save_file(self, file_name: str, content: bytes) -> str:
         try:
             self.s3_client.put_object(Bucket=self.bucket_name, Key=file_name, Body=content)
-            endpoint_url = os.getenv('MINIO_ENDPOINT_URL', 'http://localhost:9000')
+            endpoint_url = os.getenv("MINIO_ENDPOINT_URL", "http://localhost:9000")
             return f"{endpoint_url}/{self.bucket_name}/{file_name}"
         except Exception as e:
             logger.error(f"MinIO Save failure: {e}")
@@ -144,13 +144,17 @@ class MinIOStorageProvider(BaseStorageProvider):
 
     def generate_presigned_upload_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
-            return self.s3_client.generate_presigned_url('put_object', Params={'Bucket': self.bucket_name, 'Key': file_name}, ExpiresIn=expiration)
+            return self.s3_client.generate_presigned_url(
+                "put_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
+            )
         except Exception:
             return ""
 
     def generate_presigned_download_url(self, file_name: str, expiration: int = 3600) -> str:
         try:
-            return self.s3_client.generate_presigned_url('get_object', Params={'Bucket': self.bucket_name, 'Key': file_name}, ExpiresIn=expiration)
+            return self.s3_client.generate_presigned_url(
+                "get_object", Params={"Bucket": self.bucket_name, "Key": file_name}, ExpiresIn=expiration
+            )
         except Exception:
             return ""
 
@@ -159,15 +163,15 @@ class CloudinaryStorageProvider(BaseStorageProvider):
     def __init__(self):
         import cloudinary
         import cloudinary.uploader
+
         cloudinary.config()
 
     def save_file(self, file_name: str, content: bytes) -> str:
         import cloudinary.uploader
+
         try:
             response = cloudinary.uploader.upload(
-                content,
-                public_id=os.path.splitext(file_name)[0],
-                resource_type="auto"
+                content, public_id=os.path.splitext(file_name)[0], resource_type="auto"
             )
             return response.get("secure_url")
         except Exception as e:
@@ -179,6 +183,7 @@ class CloudinaryStorageProvider(BaseStorageProvider):
 
     def generate_presigned_download_url(self, file_name: str, expiration: int = 3600) -> str:
         import cloudinary
+
         return cloudinary.CloudinaryImage(file_name).build_url(secure=True)
 
 
@@ -186,15 +191,15 @@ def get_storage_provider() -> BaseStorageProvider:
     """
     Returns the storage provider based on environment setting STORAGE_PROVIDER, fallback to LocalStorageProvider.
     """
-    provider = os.getenv('STORAGE_PROVIDER', 'local').lower()
+    provider = os.getenv("STORAGE_PROVIDER", "local").lower()
     try:
-        if provider == 's3':
+        if provider == "s3":
             return S3StorageProvider()
-        elif provider == 'r2':
+        elif provider == "r2":
             return R2StorageProvider()
-        elif provider == 'minio':
+        elif provider == "minio":
             return MinIOStorageProvider()
-        elif provider == 'cloudinary':
+        elif provider == "cloudinary":
             return CloudinaryStorageProvider()
     except Exception as e:
         logger.warning(f"Failed to initialize {provider} storage provider ({e}). Falling back to LocalStorageProvider.")

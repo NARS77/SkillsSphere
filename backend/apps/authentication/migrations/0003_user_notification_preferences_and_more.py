@@ -9,37 +9,46 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('authentication', '0002_profile_last_activity_date_profile_streak_profile_xp'),
+        ("authentication", "0002_profile_last_activity_date_profile_streak_profile_xp"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='notification_preferences',
-            field=models.JSONField(blank=True, default=dict, help_text='Toggles for email_notifications, push_notifications, etc.'),
+            model_name="user",
+            name="notification_preferences",
+            field=models.JSONField(
+                blank=True, default=dict, help_text="Toggles for email_notifications, push_notifications, etc."
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='two_factor_enabled',
+            model_name="user",
+            name="two_factor_enabled",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='user',
-            name='two_factor_secret',
-            field=models.CharField(blank=True, default='', max_length=255),
+            model_name="user",
+            name="two_factor_secret",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
         migrations.CreateModel(
-            name='LoginHistory',
+            name="LoginHistory",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.CharField(blank=True, default='', max_length=500)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='login_histories', to=settings.AUTH_USER_MODEL)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.CharField(blank=True, default="", max_length=500)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="login_histories",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

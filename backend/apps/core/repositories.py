@@ -2,12 +2,14 @@ from typing import Type, TypeVar, Generic, List, Optional, Any
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
-M = TypeVar('M', bound=models.Model)
+M = TypeVar("M", bound=models.Model)
+
 
 class BaseRepository(Generic[M]):
     """
     Base repository class encapsulating common database retrieval and modification queries.
     """
+
     model: Type[M]
 
     def __init__(self, model: Type[M]):
@@ -52,6 +54,7 @@ class BaseRepository(Generic[M]):
 
 
 from .models import Notification
+
 
 class NotificationRepository(BaseRepository[Notification]):
     def __init__(self):

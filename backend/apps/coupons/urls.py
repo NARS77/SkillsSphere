@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import CouponViewSet
 
 router = DefaultRouter()
-router.register(r'coupons', CouponViewSet, basename='coupon')
+router.register(r"coupons", CouponViewSet, basename="coupon")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

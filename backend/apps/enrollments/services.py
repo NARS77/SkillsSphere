@@ -12,10 +12,12 @@ from .repositories import EnrollmentRepository, UserProgressRepository, WatchHis
 
 User = get_user_model()
 
+
 class EnrollmentService:
     """
     Service coordinating course registrations/enrollments.
     """
+
     def __init__(self, enrollment_repo=None):
         self.enrollment_repo = enrollment_repo or EnrollmentRepository()
 
@@ -39,11 +41,7 @@ class EnrollmentService:
             enrollment.unregistered_at = None
             enrollment.save()
         else:
-            enrollment = self.enrollment_repo.create(
-                student=student,
-                course=course,
-                is_active=True
-            )
+            enrollment = self.enrollment_repo.create(student=student, course=course, is_active=True)
 
         return enrollment
 
@@ -68,7 +66,7 @@ class EnrollmentService:
         return enrollment
 
     def get_enrollment_history(self, student: User) -> List[Enrollment]:
-        return list(Enrollment.objects.filter(student=student).select_related('course'))
+        return list(Enrollment.objects.filter(student=student).select_related("course"))
 
     def get_enrolled_courses(self, student: User) -> List[Course]:
         enrollments = self.enrollment_repo.get_student_enrollments(student.id)
@@ -82,6 +80,7 @@ class LearningProgressService:
     """
     Service coordinating lesson completion logs and playback watch histories.
     """
+
     def __init__(self, enrollment_service=None, progress_repo=None, watch_repo=None, bookmark_repo=None):
         self.enrollment_service = enrollment_service or EnrollmentService()
         self.progress_repo = progress_repo or UserProgressRepository()
@@ -94,7 +93,7 @@ class LearningProgressService:
 
     def toggle_lesson_completion(self, student: User, lesson_id: Any, is_completed: bool) -> UserProgress:
         try:
-            lesson = Lesson.objects.select_related('section').get(id=lesson_id)
+            lesson = Lesson.objects.select_related("section").get(id=lesson_id)
         except Lesson.DoesNotExist:
             raise NotFoundException("Lesson not found.")
 
@@ -108,16 +107,16 @@ class LearningProgressService:
                 course_id=course_id,
                 lesson=lesson,
                 is_completed=is_completed,
-                completed_at=timezone.now() if is_completed else None
+                completed_at=timezone.now() if is_completed else None,
             )
         else:
             progress.is_completed = is_completed
             progress.completed_at = timezone.now() if is_completed else None
             progress.save()
-        
+
         # Check and update enrollment-level completion
         self.check_and_update_course_completion(student, course_id)
-        
+
         return progress
 
     def check_and_update_course_completion(self, student: User, course_id: Any) -> None:
@@ -126,21 +125,24 @@ class LearningProgressService:
             return
 
         stats = self.get_course_progress_stats(student, course_id)
-        if stats['total_count'] > 0 and stats['completed_count'] == stats['total_count']:
+        if stats["total_count"] > 0 and stats["completed_count"] == stats["total_count"]:
             if not enrollment.completed_at:
                 enrollment.completed_at = timezone.now()
                 enrollment.save()
                 # Trigger Course Completed Signal Event!
                 from apps.core import events
+
                 events.course_completed.send(sender=LearningProgressService, student=student, course=enrollment.course)
         else:
             if enrollment.completed_at:
                 enrollment.completed_at = None
                 enrollment.save()
 
-    def save_watch_position(self, student: User, lesson_id: Any, seconds: int, device: str = 'Web Browser', watch_time: int = 0) -> WatchHistory:
+    def save_watch_position(
+        self, student: User, lesson_id: Any, seconds: int, device: str = "Web Browser", watch_time: int = 0
+    ) -> WatchHistory:
         try:
-            lesson = Lesson.objects.select_related('section').get(id=lesson_id)
+            lesson = Lesson.objects.select_related("section").get(id=lesson_id)
         except Lesson.DoesNotExist:
             raise NotFoundException("Lesson not found.")
 
@@ -161,7 +163,7 @@ class LearningProgressService:
                 last_position=seconds,
                 completion_percentage=percent,
                 device=device,
-                watch_time=watch_time
+                watch_time=watch_time,
             )
         else:
             history.last_position = seconds
@@ -186,89 +188,82 @@ class LearningProgressService:
         if bookmark:
             bookmark.delete()
             return False  # Bookmarked status is now False
-        
+
         self.bookmark_repo.create(student=student, lesson=lesson)
         return True  # Bookmarked status is now True
 
     def get_learning_statistics(self, student: User) -> Dict[str, Any]:
         # 1. Total watch time
-        total_seconds = self.watch_repo.filter(student=student).aggregate(Sum('watch_time'))['watch_time__sum'] or 0
+        total_seconds = self.watch_repo.filter(student=student).aggregate(Sum("watch_time"))["watch_time__sum"] or 0
         hours_watched = round(total_seconds / 3600, 1)
 
         # 2. Lessons completed
         lessons_completed = self.progress_repo.filter(student=student, is_completed=True).count()
 
         # 3. Courses completed
-        courses_completed = self.enrollment_service.enrollment_repo.filter(student=student, completed_at__isnull=False).count()
+        courses_completed = self.enrollment_service.enrollment_repo.filter(
+            student=student, completed_at__isnull=False
+        ).count()
 
         # 4. Weekly activity
         today = timezone.now().date()
         weekly_activity = []
         days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         monday = today - datetime.timedelta(days=today.weekday())
-        
+
         for i in range(7):
             day_date = monday + datetime.timedelta(days=i)
-            day_seconds = self.watch_repo.filter(
-                student=student,
-                updated_at__date=day_date
-            ).aggregate(Sum('watch_time'))['watch_time__sum'] or 0
-            
-            weekly_activity.append({
-                'day': days_of_week[i],
-                'minutes': round(day_seconds / 60, 1)
-            })
+            day_seconds = (
+                self.watch_repo.filter(student=student, updated_at__date=day_date).aggregate(Sum("watch_time"))[
+                    "watch_time__sum"
+                ]
+                or 0
+            )
+
+            weekly_activity.append({"day": days_of_week[i], "minutes": round(day_seconds / 60, 1)})
 
         # 5. Average daily learning (in minutes)
-        first_enrollment = self.enrollment_service.enrollment_repo.filter(student=student).order_by('created_at').first()
+        first_enrollment = (
+            self.enrollment_service.enrollment_repo.filter(student=student).order_by("created_at").first()
+        )
         active_days = 1
         if first_enrollment:
             delta = timezone.now() - first_enrollment.created_at
             active_days = max(delta.days, 1)
-        
+
         avg_daily_minutes = round((total_seconds / 60) / active_days, 1)
 
         return {
-            'hours_watched': hours_watched,
-            'lessons_completed': lessons_completed,
-            'courses_completed': courses_completed,
-            'avg_daily_learning': avg_daily_minutes,
-            'weekly_activity': weekly_activity
+            "hours_watched": hours_watched,
+            "lessons_completed": lessons_completed,
+            "courses_completed": courses_completed,
+            "avg_daily_learning": avg_daily_minutes,
+            "weekly_activity": weekly_activity,
         }
 
     def get_course_progress_stats(self, student: User, course_id: Any) -> Dict[str, Any]:
-        published_lessons = Lesson.objects.filter(
-            section__course_id=course_id,
-            status=Lesson.Status.PUBLISHED
-        )
+        published_lessons = Lesson.objects.filter(section__course_id=course_id, status=Lesson.Status.PUBLISHED)
         total_lessons_count = published_lessons.count()
 
         if total_lessons_count == 0:
-            return {
-                'completed_count': 0,
-                'total_count': 0,
-                'percentage': 0.0
-            }
+            return {"completed_count": 0, "total_count": 0, "percentage": 0.0}
 
         completed_lessons_count = self.progress_repo.filter(
-            student=student,
-            course_id=course_id,
-            is_completed=True,
-            lesson__status=Lesson.Status.PUBLISHED
+            student=student, course_id=course_id, is_completed=True, lesson__status=Lesson.Status.PUBLISHED
         ).count()
 
         percentage = round((completed_lessons_count / total_lessons_count) * 100, 1)
 
         return {
-            'completed_count': completed_lessons_count,
-            'total_count': total_lessons_count,
-            'percentage': percentage
+            "completed_count": completed_lessons_count,
+            "total_count": total_lessons_count,
+            "percentage": percentage,
         }
 
     def get_recently_watched_courses(self, student: User, limit: int = 3) -> List[Dict[str, Any]]:
-        histories = self.watch_repo.filter(student=student).select_related(
-            'lesson__section__course'
-        ).order_by('-updated_at')
+        histories = (
+            self.watch_repo.filter(student=student).select_related("lesson__section__course").order_by("-updated_at")
+        )
 
         recent_courses = []
         seen_course_ids = set()
@@ -278,16 +273,18 @@ class LearningProgressService:
             if course.id not in seen_course_ids:
                 seen_course_ids.add(course.id)
                 progress_stats = self.get_course_progress_stats(student, course.id)
-                
-                recent_courses.append({
-                    'course_id': str(course.id),
-                    'title': course.title,
-                    'slug': course.slug,
-                    'thumbnail': course.thumbnail.url if course.thumbnail else None,
-                    'progress_percent': progress_stats['percentage'],
-                    'last_lesson_title': history.lesson.title,
-                    'last_watched_at': history.updated_at
-                })
+
+                recent_courses.append(
+                    {
+                        "course_id": str(course.id),
+                        "title": course.title,
+                        "slug": course.slug,
+                        "thumbnail": course.thumbnail.url if course.thumbnail else None,
+                        "progress_percent": progress_stats["percentage"],
+                        "last_lesson_title": history.lesson.title,
+                        "last_watched_at": history.updated_at,
+                    }
+                )
 
                 if len(recent_courses) >= limit:
                     break

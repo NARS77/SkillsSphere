@@ -4,11 +4,13 @@ from .keyword import DatabaseKeywordSearchEngine
 
 logger = logging.getLogger(__name__)
 
+
 class SemanticSearchEngine(BaseSearchEngine):
     """
     Mock/Pluggable Semantic Search Engine that integrates vector embeddings.
     Falls back to Keyword searches in local setup.
     """
+
     def __init__(self):
         self.fallback = DatabaseKeywordSearchEngine()
 

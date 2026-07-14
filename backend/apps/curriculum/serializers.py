@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import Section, Lesson, LessonResource
 
+
 class LessonResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonResource
-        fields = ('id', 'title', 'file', 'created_at')
-        read_only_fields = ('id', 'created_at')
+        fields = ("id", "title", "file", "created_at")
+        read_only_fields = ("id", "created_at")
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -14,20 +15,38 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = (
-            'id', 'section', 'title', 'description', 'lesson_type', 
-            'duration', 'video_url', 'content_text', 'content_file', 
-            'external_link', 'is_preview', 'status', 'order', 'resources'
+            "id",
+            "section",
+            "title",
+            "description",
+            "lesson_type",
+            "duration",
+            "video_url",
+            "content_text",
+            "content_file",
+            "external_link",
+            "is_preview",
+            "status",
+            "order",
+            "resources",
         )
-        read_only_fields = ('id', 'order', 'resources')
+        read_only_fields = ("id", "order", "resources")
 
 
 class LessonCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = (
-            'title', 'description', 'lesson_type', 'duration', 
-            'video_url', 'content_text', 'content_file', 'external_link', 
-            'is_preview', 'status'
+            "title",
+            "description",
+            "lesson_type",
+            "duration",
+            "video_url",
+            "content_text",
+            "content_file",
+            "external_link",
+            "is_preview",
+            "status",
         )
 
     def validate_duration(self, value):
@@ -42,8 +61,8 @@ class SectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Section
-        fields = ('id', 'course', 'title', 'order', 'lessons', 'duration')
-        read_only_fields = ('id', 'order', 'lessons', 'duration')
+        fields = ("id", "course", "title", "order", "lessons", "duration")
+        read_only_fields = ("id", "order", "lessons", "duration")
 
     def get_duration(self, obj) -> int:
         """
@@ -55,4 +74,4 @@ class SectionSerializer(serializers.ModelSerializer):
 class SectionCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ('title',)
+        fields = ("title",)

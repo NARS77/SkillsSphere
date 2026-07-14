@@ -11,21 +11,23 @@ from apps.ai.providers.openai import OpenAIProvider
 from apps.ai.providers.claude import ClaudeProvider
 from apps.ai.providers.ollama import OllamaProvider
 
+
 class AIGateway:
     """
-    Central gateway coordinating prompt execution, token usage tracking, 
+    Central gateway coordinating prompt execution, token usage tracking,
     caching, rate limiting, and provider adapter selection.
     """
+
     def __init__(self):
         # Read active provider from environment variable
-        self.provider_name = os.getenv('AI_PROVIDER', 'mock').lower()
-        if self.provider_name == 'gemini':
+        self.provider_name = os.getenv("AI_PROVIDER", "mock").lower()
+        if self.provider_name == "gemini":
             self.provider = GeminiProvider()
-        elif self.provider_name == 'openai':
+        elif self.provider_name == "openai":
             self.provider = OpenAIProvider()
-        elif self.provider_name == 'claude':
+        elif self.provider_name == "claude":
             self.provider = ClaudeProvider()
-        elif self.provider_name == 'ollama':
+        elif self.provider_name == "ollama":
             self.provider = OllamaProvider()
         else:
             self.provider = MockProvider()
@@ -34,12 +36,12 @@ class AIGateway:
         """
         Validates daily credit limits for students.
         """
-        if user.role == 'ADMIN':
+        if user.role == "ADMIN":
             return  # Admins have unlimited access
 
         today = datetime.date.today()
         quota, created = AIQuota.objects.get_or_create(student=user)
-        
+
         # Reset quota count if date changes
         if quota.last_reset != today:
             quota.daily_request_count = 0
@@ -48,11 +50,10 @@ class AIGateway:
             quota.save()
 
         # Enforce limits (e.g. 50 requests per day)
-        daily_max_requests = int(os.getenv('AI_DAILY_MAX_REQUESTS', '50'))
+        daily_max_requests = int(os.getenv("AI_DAILY_MAX_REQUESTS", "50"))
         if quota.daily_request_count >= daily_max_requests:
             raise ValidationException(
-                f"Daily AI request limit reached ({daily_max_requests} requests). "
-                "Please try again tomorrow."
+                f"Daily AI request limit reached ({daily_max_requests} requests). " "Please try again tomorrow."
             )
 
     def _log_token_usage(self, user, course, feature_name, prompt_tokens, completion_tokens):
@@ -64,7 +65,7 @@ class AIGateway:
             return
 
         # Estimate API costs: $0.000002 per token as baseline
-        cost_rate = Decimal(os.getenv('AI_COST_PER_TOKEN', '0.000002'))
+        cost_rate = Decimal(os.getenv("AI_COST_PER_TOKEN", "0.000002"))
         estimated_cost = Decimal(total) * cost_rate
 
         # 1. Create audit record
@@ -75,7 +76,7 @@ class AIGateway:
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             total_tokens=total,
-            estimated_cost=estimated_cost
+            estimated_cost=estimated_cost,
         )
 
         # 2. Update daily quota stats
@@ -102,27 +103,23 @@ class AIGateway:
 
         # Call Provider
         result = self.provider.generate(prompt, system_instruction)
-        
+
         # Log Tokens
         self._log_token_usage(
             user=user,
             course=course,
             feature_name=feature_name,
-            prompt_tokens=result['prompt_tokens'],
-            completion_tokens=result['completion_tokens']
+            prompt_tokens=result["prompt_tokens"],
+            completion_tokens=result["completion_tokens"],
         )
 
         # Write Cache (expires in 12 hours)
         expires = timezone.now() + timezone.timedelta(hours=12)
         AICache.objects.update_or_create(
-            cache_key=cache_key,
-            defaults={
-                'response_text': result['text'],
-                'expires_at': expires
-            }
+            cache_key=cache_key, defaults={"response_text": result["text"], "expires_at": expires}
         )
 
-        return result['text']
+        return result["text"]
 
     def execute_stream(self, user, course, feature_name, prompt, system_instruction=None):
         """
@@ -131,15 +128,15 @@ class AIGateway:
         self._verify_quota(user)
 
         stream = self.provider.generate_stream(prompt, system_instruction)
-        
+
         for chunk in stream:
-            if chunk['done']:
+            if chunk["done"]:
                 # Save usage metrics on final chunk
                 self._log_token_usage(
                     user=user,
                     course=course,
                     feature_name=feature_name,
-                    prompt_tokens=chunk['prompt_tokens'],
-                    completion_tokens=chunk['completion_tokens']
+                    prompt_tokens=chunk["prompt_tokens"],
+                    completion_tokens=chunk["completion_tokens"],
                 )
-            yield chunk['text']
+            yield chunk["text"]

@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('authentication', '0001_initial'),
+        ("authentication", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='last_activity_date',
+            model_name="profile",
+            name="last_activity_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='streak',
+            model_name="profile",
+            name="streak",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='xp',
+            model_name="profile",
+            name="xp",
             field=models.IntegerField(default=0),
         ),
     ]

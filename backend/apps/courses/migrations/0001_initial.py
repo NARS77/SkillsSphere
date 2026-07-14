@@ -16,49 +16,88 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('slug', models.SlugField(blank=True, max_length=100, unique=True)),
-                ('icon', models.CharField(help_text='Lucide icon name', max_length=50)),
-                ('color', models.CharField(default='brand', help_text='Tailwind color prefix (e.g. indigo, emerald)', max_length=50)),
-                ('order', models.IntegerField(default=0, help_text='Custom display sorting order')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("slug", models.SlugField(blank=True, max_length=100, unique=True)),
+                ("icon", models.CharField(help_text="Lucide icon name", max_length=50)),
+                (
+                    "color",
+                    models.CharField(
+                        default="brand", help_text="Tailwind color prefix (e.g. indigo, emerald)", max_length=50
+                    ),
+                ),
+                ("order", models.IntegerField(default=0, help_text="Custom display sorting order")),
             ],
             options={
-                'verbose_name_plural': 'Categories',
-                'ordering': ['order', 'name'],
+                "verbose_name_plural": "Categories",
+                "ordering": ["order", "name"],
             },
         ),
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('slug', models.SlugField(blank=True, max_length=255, unique=True)),
-                ('short_description', models.CharField(max_length=500)),
-                ('description', models.TextField(help_text='Detailed Markdown description of the course')),
-                ('thumbnail', models.ImageField(blank=True, null=True, upload_to='courses/thumbnails/')),
-                ('banner', models.ImageField(blank=True, null=True, upload_to='courses/banners/')),
-                ('difficulty', models.CharField(choices=[('BEGINNER', 'Beginner'), ('INTERMEDIATE', 'Intermediate'), ('ADVANCED', 'Advanced')], default='BEGINNER', max_length=20)),
-                ('language', models.CharField(default='English', max_length=50)),
-                ('duration', models.IntegerField(default=0, help_text='Estimated course duration in hours')),
-                ('price', models.DecimalField(decimal_places=2, default=0.0, max_digits=10)),
-                ('discount_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('status', models.CharField(choices=[('DRAFT', 'Draft'), ('PUBLISHED', 'Published'), ('ARCHIVED', 'Archived')], default='DRAFT', max_length=20)),
-                ('visibility', models.CharField(choices=[('PUBLIC', 'Public'), ('PRIVATE', 'Private')], default='PUBLIC', max_length=20)),
-                ('tags', models.JSONField(blank=True, default=list)),
-                ('prerequisites', models.JSONField(blank=True, default=list)),
-                ('learning_outcomes', models.JSONField(blank=True, default=list)),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='courses', to='courses.category')),
-                ('instructor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='instructed_courses', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("slug", models.SlugField(blank=True, max_length=255, unique=True)),
+                ("short_description", models.CharField(max_length=500)),
+                ("description", models.TextField(help_text="Detailed Markdown description of the course")),
+                ("thumbnail", models.ImageField(blank=True, null=True, upload_to="courses/thumbnails/")),
+                ("banner", models.ImageField(blank=True, null=True, upload_to="courses/banners/")),
+                (
+                    "difficulty",
+                    models.CharField(
+                        choices=[("BEGINNER", "Beginner"), ("INTERMEDIATE", "Intermediate"), ("ADVANCED", "Advanced")],
+                        default="BEGINNER",
+                        max_length=20,
+                    ),
+                ),
+                ("language", models.CharField(default="English", max_length=50)),
+                ("duration", models.IntegerField(default=0, help_text="Estimated course duration in hours")),
+                ("price", models.DecimalField(decimal_places=2, default=0.0, max_digits=10)),
+                ("discount_price", models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("DRAFT", "Draft"), ("PUBLISHED", "Published"), ("ARCHIVED", "Archived")],
+                        default="DRAFT",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "visibility",
+                    models.CharField(
+                        choices=[("PUBLIC", "Public"), ("PRIVATE", "Private")], default="PUBLIC", max_length=20
+                    ),
+                ),
+                ("tags", models.JSONField(blank=True, default=list)),
+                ("prerequisites", models.JSONField(blank=True, default=list)),
+                ("learning_outcomes", models.JSONField(blank=True, default=list)),
+                (
+                    "category",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="courses",
+                        to="courses.category",
+                    ),
+                ),
+                (
+                    "instructor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="instructed_courses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

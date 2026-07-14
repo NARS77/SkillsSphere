@@ -4,6 +4,7 @@ from django.db.models import Max
 from apps.enrollments.models import Enrollment
 from .models import GradebookEntry
 
+
 class GradebookService:
     @staticmethod
     def recalculate_gradebook_entry(student, course):
@@ -19,17 +20,17 @@ class GradebookService:
         quiz_pcts = []
         for quiz in quizzes:
             # Find best attempt
-            best_attempt = QuizAttempt.objects.filter(
-                student=student, 
-                quiz=quiz,
-                status=QuizAttempt.Status.SUBMITTED
-            ).order_by('-percentage').first()
-            
+            best_attempt = (
+                QuizAttempt.objects.filter(student=student, quiz=quiz, status=QuizAttempt.Status.SUBMITTED)
+                .order_by("-percentage")
+                .first()
+            )
+
             if best_attempt:
                 quiz_pcts.append(float(best_attempt.percentage))
             else:
                 quiz_pcts.append(0.0)
-        
+
         quiz_avg = sum(quiz_pcts) / len(quiz_pcts) if quiz_pcts else 0.0
 
         # 2. Assignments average calculation
@@ -37,11 +38,9 @@ class GradebookService:
         assignment_pcts = []
         for ass in assignments:
             submission = AssignmentSubmission.objects.filter(
-                student=student,
-                assignment=ass,
-                status=AssignmentSubmission.Status.GRADED
+                student=student, assignment=ass, status=AssignmentSubmission.Status.GRADED
             ).first()
-            
+
             if submission:
                 max_score = float(ass.max_score) if ass.max_score > 0 else 1.0
                 pct = (float(submission.score) / max_score) * 100.0
@@ -63,29 +62,29 @@ class GradebookService:
 
         # Letter grade mapping
         if overall >= 90.0:
-            letter = 'A'
+            letter = "A"
         elif overall >= 80.0:
-            letter = 'B'
+            letter = "B"
         elif overall >= 70.0:
-            letter = 'C'
+            letter = "C"
         elif overall >= 60.0:
-            letter = 'D'
+            letter = "D"
         else:
-            letter = 'F'
+            letter = "F"
 
         passed = overall >= 60.0
 
         entry, created = GradebookEntry.objects.update_or_create(
             enrollment=enrollment,
             defaults={
-                'student': student,
-                'course': course,
-                'quiz_average': quiz_avg,
-                'assignment_average': ass_avg,
-                'overall_score': overall,
-                'grade_letter': letter,
-                'passed': passed
-            }
+                "student": student,
+                "course": course,
+                "quiz_average": quiz_avg,
+                "assignment_average": ass_avg,
+                "overall_score": overall,
+                "grade_letter": letter,
+                "passed": passed,
+            },
         )
 
         return entry
@@ -94,32 +93,36 @@ class GradebookService:
     def export_gradebook_csv(course):
         output = io.StringIO()
         writer = csv.writer(output)
-        
+
         # Headers
-        writer.writerow([
-            'Student Email', 
-            'Student Name', 
-            'Quiz Average (%)', 
-            'Assignment Average (%)', 
-            'Overall Score (%)', 
-            'Grade Letter', 
-            'Status'
-        ])
-        
-        entries = GradebookEntry.objects.filter(course=course).select_related('student')
+        writer.writerow(
+            [
+                "Student Email",
+                "Student Name",
+                "Quiz Average (%)",
+                "Assignment Average (%)",
+                "Overall Score (%)",
+                "Grade Letter",
+                "Status",
+            ]
+        )
+
+        entries = GradebookEntry.objects.filter(course=course).select_related("student")
         for entry in entries:
             student = entry.student
             name = f"{student.first_name} {student.last_name}".strip() or student.username
-            status = 'Passed' if entry.passed else 'Failed'
-            
-            writer.writerow([
-                student.email,
-                name,
-                f"{entry.quiz_average:.1f}",
-                f"{entry.assignment_average:.1f}",
-                f"{entry.overall_score:.1f}",
-                entry.grade_letter,
-                status
-            ])
-            
+            status = "Passed" if entry.passed else "Failed"
+
+            writer.writerow(
+                [
+                    student.email,
+                    name,
+                    f"{entry.quiz_average:.1f}",
+                    f"{entry.assignment_average:.1f}",
+                    f"{entry.overall_score:.1f}",
+                    entry.grade_letter,
+                    status,
+                ]
+            )
+
         return output.getvalue()

@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import WishlistItemViewSet
 
 router = DefaultRouter()
-router.register(r'wishlist', WishlistItemViewSet, basename='wishlist')
+router.register(r"wishlist", WishlistItemViewSet, basename="wishlist")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

@@ -12,17 +12,19 @@ from apps.coupons.services import CouponService
 from apps.core.models import Notification
 from .models import Payment
 
+
 class CommerceService:
     @staticmethod
     def calculate_discount(price, coupon):
         from apps.coupons.models import Coupon
+
         price = Decimal(str(price))
         val = Decimal(str(coupon.value))
         if coupon.coupon_type == Coupon.CouponType.PERCENTAGE:
-            discount = price * (val / Decimal('100.00'))
-            return max(Decimal('0.00'), price - discount)
+            discount = price * (val / Decimal("100.00"))
+            return max(Decimal("0.00"), price - discount)
         elif coupon.coupon_type == Coupon.CouponType.FIXED:
-            return max(Decimal('0.00'), price - val)
+            return max(Decimal("0.00"), price - val)
         return price
 
     @classmethod
@@ -47,24 +49,16 @@ class CommerceService:
             coupon = CouponService.validate_coupon(coupon_code)
 
         # Create Order
-        order = Order.objects.create(
-            student=student,
-            total_amount=Decimal('0.00'),
-            coupon=coupon
-        )
+        order = Order.objects.create(student=student, total_amount=Decimal("0.00"), coupon=coupon)
 
-        total_amount = Decimal('0.00')
+        total_amount = Decimal("0.00")
         for course in courses:
             price = Decimal(str(course.price))
             # If coupon is specific to this course or coupon is global
             if coupon and (not coupon.course or coupon.course == course):
                 price = cls.calculate_discount(price, coupon)
-            
-            OrderItem.objects.create(
-                order=order,
-                course=course,
-                price=price
-            )
+
+            OrderItem.objects.create(order=order, course=course, price=price)
             total_amount += price
 
         order.total_amount = total_amount
@@ -72,11 +66,12 @@ class CommerceService:
 
         # Audit Log
         from apps.audit_logs.services import AuditLogService
-        AuditLogService.log_action(student, "CHECKOUT_INITIATED", {
-            "order_id": str(order.id),
-            "total_amount": float(total_amount),
-            "coupon": coupon_code
-        })
+
+        AuditLogService.log_action(
+            student,
+            "CHECKOUT_INITIATED",
+            {"order_id": str(order.id), "total_amount": float(total_amount), "coupon": coupon_code},
+        )
 
         return order
 
@@ -88,13 +83,12 @@ class CommerceService:
 
         # Verify using abstract provider adapters
         from apps.payments.providers import get_payment_provider
+
         gateway = get_payment_provider(provider)
-        
-        is_valid = gateway.verify_payment({
-            "transaction_id": transaction_id,
-            "payment_id": transaction_id,
-            "order_id": order_id
-        })
+
+        is_valid = gateway.verify_payment(
+            {"transaction_id": transaction_id, "payment_id": transaction_id, "order_id": order_id}
+        )
         if not is_valid:
             raise ValidationException("Payment verification failed with the selected provider gateway.")
 
@@ -107,10 +101,7 @@ class CommerceService:
 
         # Create Payment
         payment = Payment.objects.create(
-            order=order,
-            payment_provider=provider,
-            transaction_id=transaction_id,
-            status=Payment.Status.SUCCESS
+            order=order, payment_provider=provider, transaction_id=transaction_id, status=Payment.Status.SUCCESS
         )
 
         # Increment Coupon uses
@@ -120,24 +111,22 @@ class CommerceService:
 
         # Enroll student in courses
         for item in order.items.all():
-            Enrollment.objects.get_or_create(
-                student=order.student,
-                course=item.course,
-                defaults={'is_active': True}
-            )
+            Enrollment.objects.get_or_create(student=order.student, course=item.course, defaults={"is_active": True})
 
         # Generate receipt PDF asynchronously via Celery task
         from apps.payments.tasks import generate_invoice_task
+
         generate_invoice_task.delay(str(payment.id))
 
         # Send Notifications
         from apps.core.notifications import NotificationService
+
         NotificationService.send_notification(
             user=order.student,
             title="Purchase Confirmed",
             message=f"Thank you for your purchase! Your order total was ${order.total_amount:.2f}.",
             notification_type="PAYMENT_SUCCESS",
-            channels=['in_app', 'email']
+            channels=["in_app", "email"],
         )
 
         for item in order.items.all():
@@ -146,23 +135,24 @@ class CommerceService:
                 title="New Student Enrollment",
                 message=f"{order.student.username} purchased and enrolled in {item.course.title}.",
                 notification_type="NEW_ENROLLMENT",
-                channels=['in_app', 'email']
+                channels=["in_app", "email"],
             )
 
         # Audit Log
         from apps.audit_logs.services import AuditLogService
-        AuditLogService.log_action(order.student, "PAYMENT_VERIFIED", {
-            "order_id": str(order.id),
-            "transaction_id": transaction_id,
-            "total_amount": float(order.total_amount)
-        })
+
+        AuditLogService.log_action(
+            order.student,
+            "PAYMENT_VERIFIED",
+            {"order_id": str(order.id), "transaction_id": transaction_id, "total_amount": float(order.total_amount)},
+        )
 
         return order
 
     @staticmethod
     def generate_payout_receipt(payment):
         from PIL import Image, ImageDraw
-        
+
         # 1. Create landscape/portrait canvas image
         width, height = 500, 700
         image = Image.new("RGB", (width, height), "white")
@@ -176,7 +166,8 @@ class CommerceService:
         try:
             from django.conf import settings
             import os
-            logo_path = os.path.join(settings.BASE_DIR.parent, 'docs', 'branding', 'icon_mark.png')
+
+            logo_path = os.path.join(settings.BASE_DIR.parent, "docs", "branding", "icon_mark.png")
             if os.path.exists(logo_path):
                 logo_img = Image.open(logo_path).resize((40, 40), Image.Resampling.LANCZOS)
                 image.paste(logo_img, (40, 40), logo_img.convert("RGBA") if logo_img.mode != "RGBA" else None)
@@ -187,13 +178,15 @@ class CommerceService:
         draw.text((40, 100), f"Receipt Date: {timezone.now().strftime('%Y-%m-%d %H:%M')}", fill="#475569")
         draw.text((40, 120), f"Transaction ID: {payment.transaction_id}", fill="#475569")
         draw.text((40, 140), f"Order ID: {payment.order.id}", fill="#475569")
-        draw.text((40, 160), f"Customer: {payment.order.student.username} ({payment.order.student.email})", fill="#475569")
+        draw.text(
+            (40, 160), f"Customer: {payment.order.student.username} ({payment.order.student.email})", fill="#475569"
+        )
 
         draw.line([(40, 195), (width - 40, 195)], fill="#CBD5E1", width=1)
 
         # 4. Itemized Purchases
         draw.text((40, 215), "Purchased Courses", fill="#1E293B")
-        
+
         y_offset = 245
         for item in payment.order.items.all():
             draw.text((40, y_offset), f"- {item.course.title[:40]}", fill="#334155")

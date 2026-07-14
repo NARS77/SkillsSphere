@@ -4,6 +4,7 @@ from .models import Payment
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task(name="payments.generate_invoice_task")
 def generate_invoice_task(payment_id):
     """
@@ -13,6 +14,7 @@ def generate_invoice_task(payment_id):
     try:
         payment = Payment.objects.get(id=payment_id)
         from .services import CommerceService
+
         CommerceService.generate_payout_receipt(payment)
         logger.info(f"Successfully generated invoice receipt PDF for payment {payment_id}")
         return True

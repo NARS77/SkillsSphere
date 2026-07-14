@@ -4,10 +4,12 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
+
 class CacheService:
     """
     Central Service managing application caching, invalidation, versioning, and tagging.
     """
+
     VERSION = 1  # Global Cache versioning key to invalidate schemas upon deployments
 
     @classmethod
@@ -37,7 +39,7 @@ class CacheService:
         """
         full_key = cls.get_key(key)
         success = cache.set(full_key, value, timeout)
-        
+
         if success and tags:
             for tag in tags:
                 cls._register_tag(tag, full_key)
@@ -72,4 +74,4 @@ class CacheService:
         keys = cache.get(tag_key, [])
         if full_key not in keys:
             keys.append(full_key)
-            cache.set(tag_key, keys, timeout=86400 * 30) # Preserve tag keys mapping for 30 days
+            cache.set(tag_key, keys, timeout=86400 * 30)  # Preserve tag keys mapping for 30 days

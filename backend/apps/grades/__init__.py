@@ -1,1 +1,1 @@
-default_app_config = 'apps.grades.apps.GradesConfig'
+default_app_config = "apps.grades.apps.GradesConfig"

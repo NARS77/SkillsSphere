@@ -11,30 +11,49 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
-        ('enrollments', '0002_enrollment_completed_at_enrollment_unregistered_at_and_more'),
+        ("courses", "0001_initial"),
+        ("enrollments", "0002_enrollment_completed_at_enrollment_unregistered_at_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Certificate',
+            name="Certificate",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('certificate_id', models.CharField(max_length=100, unique=True)),
-                ('issued_at', models.DateTimeField(auto_now_add=True)),
-                ('pdf_file', models.FileField(blank=True, null=True, upload_to='certificates/pdfs/')),
-                ('verification_url', models.URLField(blank=True, default='', max_length=500)),
-                ('qr_code_image', models.ImageField(blank=True, null=True, upload_to='certificates/qrcodes/')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='certificates', to='courses.course')),
-                ('enrollment', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='certificate', to='enrollments.enrollment')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='certificates', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("certificate_id", models.CharField(max_length=100, unique=True)),
+                ("issued_at", models.DateTimeField(auto_now_add=True)),
+                ("pdf_file", models.FileField(blank=True, null=True, upload_to="certificates/pdfs/")),
+                ("verification_url", models.URLField(blank=True, default="", max_length=500)),
+                ("qr_code_image", models.ImageField(blank=True, null=True, upload_to="certificates/qrcodes/")),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="certificates", to="courses.course"
+                    ),
+                ),
+                (
+                    "enrollment",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="certificate",
+                        to="enrollments.enrollment",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="certificates",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'abstract': False,
+                "ordering": ["-created_at"],
+                "abstract": False,
             },
         ),
     ]

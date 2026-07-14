@@ -11,70 +11,116 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
+        ("courses", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Review',
+            name="Review",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('rating', models.IntegerField(help_text='Rating from 1 to 5 stars')),
-                ('content', models.TextField(blank=True, default='')),
-                ('is_pinned', models.BooleanField(default=False)),
-                ('is_hidden', models.BooleanField(default=False)),
-                ('reported_count', models.IntegerField(default=0)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='courses.course')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("rating", models.IntegerField(help_text="Rating from 1 to 5 stars")),
+                ("content", models.TextField(blank=True, default="")),
+                ("is_pinned", models.BooleanField(default=False)),
+                ("is_hidden", models.BooleanField(default=False)),
+                ("reported_count", models.IntegerField(default=0)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="reviews", to="courses.course"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="reviews", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-is_pinned', '-created_at'],
-                'unique_together': {('student', 'course')},
+                "ordering": ["-is_pinned", "-created_at"],
+                "unique_together": {("student", "course")},
             },
         ),
         migrations.CreateModel(
-            name='ReviewReply',
+            name="ReviewReply",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('content', models.TextField()),
-                ('instructor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='review_replies', to=settings.AUTH_USER_MODEL)),
-                ('review', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='reply', to='reviews.review')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("content", models.TextField()),
+                (
+                    "instructor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="review_replies",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "review",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="reply", to="reviews.review"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'abstract': False,
+                "ordering": ["-created_at"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ReviewHelpful',
+            name="ReviewHelpful",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('review', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='helpful_votes', to='reviews.review')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='helpful_reviews', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "review",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="helpful_votes", to="reviews.review"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="helpful_reviews",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('review', 'user')},
+                "unique_together": {("review", "user")},
             },
         ),
         migrations.CreateModel(
-            name='ReviewReport',
+            name="ReviewReport",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('reason', models.TextField()),
-                ('review', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reports', to='reviews.review')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reported_reviews', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("reason", models.TextField()),
+                (
+                    "review",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="reports", to="reviews.review"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reported_reviews",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('review', 'user')},
+                "unique_together": {("review", "user")},
             },
         ),
     ]

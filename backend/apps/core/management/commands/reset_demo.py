@@ -8,15 +8,18 @@ from apps.certificates.models import Certificate
 
 User = get_user_model()
 
+
 class Command(BaseCommand):
-    help = 'Safely deletes demo content, resets database state, triggers seed_demo, and verifies the seeded environment.'
+    help = (
+        "Safely deletes demo content, resets database state, triggers seed_demo, and verifies the seeded environment."
+    )
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.WARNING("=== Starting Demo Reset Workflow ==="))
 
         # 1. Truncate demo accounts and catalog data (dependent models are cascade-deleted)
         self.stdout.write("Deleting existing demo accounts and categories...")
-        user_delete_info = User.objects.filter(email__endswith='@skillsphere.demo').delete()
+        user_delete_info = User.objects.filter(email__endswith="@skillsphere.demo").delete()
         self.stdout.write(f"Deleted user records and cascades: {user_delete_info}")
 
         category_delete_info = Category.objects.all().delete()
@@ -24,13 +27,13 @@ class Command(BaseCommand):
 
         # 2. Trigger seed_demo command
         self.stdout.write(self.style.WARNING("Running seed_demo to rebuild the environment..."))
-        call_command('seed_demo')
+        call_command("seed_demo")
 
         # 3. Verify seeded data counts
         self.stdout.write(self.style.WARNING("Verifying database seeded integrity..."))
-        
-        students_count = User.objects.filter(role='STUDENT', email__endswith='@skillsphere.demo').count()
-        instructors_count = User.objects.filter(role='INSTRUCTOR', email__endswith='@skillsphere.demo').count()
+
+        students_count = User.objects.filter(role="STUDENT", email__endswith="@skillsphere.demo").count()
+        instructors_count = User.objects.filter(role="INSTRUCTOR", email__endswith="@skillsphere.demo").count()
         courses_count = Course.objects.all().count()
         lessons_count = Lesson.objects.all().count()
         reviews_count = Review.objects.all().count()
