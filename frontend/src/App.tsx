@@ -3,18 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
-import { LoginPage } from './features/auth/pages/LoginPage';
-import { RegisterPage } from './features/auth/pages/RegisterPage';
-import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage';
-import { EmailVerifyPage } from './features/auth/pages/EmailVerifyPage';
-import { ResetPasswordPage } from './features/auth/pages/ResetPasswordPage';
-import { AccountSettingsPage } from './features/auth/pages/AccountSettingsPage';
 import { ToastContainer } from './components/ui/Toast';
 import { Confetti } from './components/ui/Confetti';
 import { CookieConsentBanner } from './components/layout/CookieConsentBanner';
 import { useAuthStore } from './store/authStore';
+import { useConfigStore } from './store/configStore';
 import { Button } from './components/ui/Button';
 import { Card } from './components/ui/Card';
+import { PageLoader } from './components/ui/PageLoader';
 import { 
   ArrowRight, 
   Brain,
@@ -22,21 +18,28 @@ import {
   ShieldCheck,
   TrendingUp,
   MessageSquare,
-  Play
+  Play,
+  Sparkles
 } from 'lucide-react';
 
-// Import new features/courses pages
-import { CourseCatalogPage } from './features/courses/pages/CourseCatalogPage';
-import { CourseDetailsPage } from './features/courses/pages/CourseDetailsPage';
-import { InstructorDashboardPage } from './features/courses/pages/InstructorDashboardPage';
-import { CreateEditCoursePage } from './features/courses/pages/CreateEditCoursePage';
-import { StudentDashboardPage } from './features/learning/pages/StudentDashboardPage';
-import { LearningPlayerPage } from './features/learning/pages/LearningPlayerPage';
-import { CertificateVerifyPage } from './features/learning/pages/CertificateVerifyPage';
-import { CheckoutPage } from './features/checkout/pages/CheckoutPage';
-import { AdminConsolePage } from './features/admin/pages/AdminConsolePage';
-import { TermsPage } from './features/legal/pages/TermsPage';
-import { PrivacyPage } from './features/legal/pages/PrivacyPage';
+// Lazy load page components for route-based chunk code-splitting
+const LoginPage = React.lazy(() => import('./features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = React.lazy(() => import('./features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = React.lazy(() => import('./features/auth/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const EmailVerifyPage = React.lazy(() => import('./features/auth/pages/EmailVerifyPage').then(m => ({ default: m.EmailVerifyPage })));
+const ResetPasswordPage = React.lazy(() => import('./features/auth/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const AccountSettingsPage = React.lazy(() => import('./features/auth/pages/AccountSettingsPage').then(m => ({ default: m.AccountSettingsPage })));
+const CourseCatalogPage = React.lazy(() => import('./features/courses/pages/CourseCatalogPage').then(m => ({ default: m.CourseCatalogPage })));
+const CourseDetailsPage = React.lazy(() => import('./features/courses/pages/CourseDetailsPage').then(m => ({ default: m.CourseDetailsPage })));
+const InstructorDashboardPage = React.lazy(() => import('./features/courses/pages/InstructorDashboardPage').then(m => ({ default: m.InstructorDashboardPage })));
+const CreateEditCoursePage = React.lazy(() => import('./features/courses/pages/CreateEditCoursePage').then(m => ({ default: m.CreateEditCoursePage })));
+const StudentDashboardPage = React.lazy(() => import('./features/learning/pages/StudentDashboardPage').then(m => ({ default: m.StudentDashboardPage })));
+const LearningPlayerPage = React.lazy(() => import('./features/learning/pages/LearningPlayerPage').then(m => ({ default: m.LearningPlayerPage })));
+const CertificateVerifyPage = React.lazy(() => import('./features/learning/pages/CertificateVerifyPage').then(m => ({ default: m.CertificateVerifyPage })));
+const CheckoutPage = React.lazy(() => import('./features/checkout/pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
+const AdminConsolePage = React.lazy(() => import('./features/admin/pages/AdminConsolePage').then(m => ({ default: m.AdminConsolePage })));
+const TermsPage = React.lazy(() => import('./features/legal/pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = React.lazy(() => import('./features/legal/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 
 const queryClient = new QueryClient();
 
@@ -115,6 +118,36 @@ const HomePage: React.FC = () => {
             </>
           )}
         </div>
+
+        {/* Demo Mode credentials card */}
+        {import.meta.env.VITE_DEMO_MODE === 'true' && (
+          <div className="max-w-lg mx-auto p-5 border border-indigo-200/50 dark:border-indigo-950/40 bg-indigo-50/20 dark:bg-indigo-950/10 rounded-xl space-y-3.5 backdrop-blur-sm text-left shadow-[0_4px_12px_rgba(79,70,229,0.03)] mt-8">
+            <div className="flex items-center gap-2 text-xs font-bold text-indigo-650 dark:text-indigo-400 uppercase tracking-wide">
+              <Sparkles className="h-4 w-4" />
+              Live Demo Accounts
+            </div>
+            <p className="text-[11px] text-slate-505 dark:text-slate-400 leading-relaxed font-light">
+              Explore all roles instantly. Click <strong>Sign In</strong> at the top to access 1-click auto-fill buttons for these profiles:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-[11px]">
+              <div className="p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/50">
+                <span className="font-bold text-slate-800 dark:text-white block mb-0.5">🎓 Student</span>
+                <span className="text-slate-400 font-mono block">student@skillsphere.demo</span>
+                <span className="text-slate-400 font-mono block">Demo@123</span>
+              </div>
+              <div className="p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/50">
+                <span className="font-bold text-slate-800 dark:text-white block mb-0.5">🏫 Instructor</span>
+                <span className="text-slate-400 font-mono block">instructor@skillsphere.demo</span>
+                <span className="text-slate-400 font-mono block">Demo@123</span>
+              </div>
+              <div className="p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/50">
+                <span className="font-bold text-slate-800 dark:text-white block mb-0.5">🔑 Admin</span>
+                <span className="text-slate-400 font-mono block">admin@skillsphere.demo</span>
+                <span className="text-slate-400 font-mono block">Demo@123</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Immersive Dashboard Mockup Preview */}
         <div className="relative mx-auto max-w-5xl rounded-xl border border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-950/40 p-2.5 shadow-2xl backdrop-blur-sm mt-16 overflow-hidden aspect-[16/10] sm:aspect-[16/9]">
@@ -285,10 +318,16 @@ const HomePage: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  const fetchConfig = useConfigStore((state) => state.fetchConfig);
+  React.useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
+        <React.Suspense fallback={<PageLoader message="Loading SkillSphere workspace..." />}>
+          <Routes>
           {/* Authentication Routes Layout (auth-specific header/styling) */}
           <Route element={<AuthLayout />}>
             <Route path="login" element={<LoginPage />} />
@@ -372,6 +411,7 @@ export const App: React.FC = () => {
           {/* Catch-all Redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </React.Suspense>
       </BrowserRouter>
       
       <ToastContainer />

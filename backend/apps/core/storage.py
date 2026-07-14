@@ -155,6 +155,33 @@ class MinIOStorageProvider(BaseStorageProvider):
             return ""
 
 
+class CloudinaryStorageProvider(BaseStorageProvider):
+    def __init__(self):
+        import cloudinary
+        import cloudinary.uploader
+        cloudinary.config()
+
+    def save_file(self, file_name: str, content: bytes) -> str:
+        import cloudinary.uploader
+        try:
+            response = cloudinary.uploader.upload(
+                content,
+                public_id=os.path.splitext(file_name)[0],
+                resource_type="auto"
+            )
+            return response.get("secure_url")
+        except Exception as e:
+            logger.error(f"Cloudinary Save failure: {e}")
+            raise
+
+    def generate_presigned_upload_url(self, file_name: str, expiration: int = 3600) -> str:
+        return f"/api/v1/storage/local-upload/?file={file_name}"
+
+    def generate_presigned_download_url(self, file_name: str, expiration: int = 3600) -> str:
+        import cloudinary
+        return cloudinary.CloudinaryImage(file_name).build_url(secure=True)
+
+
 def get_storage_provider() -> BaseStorageProvider:
     """
     Returns the storage provider based on environment setting STORAGE_PROVIDER, fallback to LocalStorageProvider.
@@ -167,6 +194,8 @@ def get_storage_provider() -> BaseStorageProvider:
             return R2StorageProvider()
         elif provider == 'minio':
             return MinIOStorageProvider()
+        elif provider == 'cloudinary':
+            return CloudinaryStorageProvider()
     except Exception as e:
         logger.warning(f"Failed to initialize {provider} storage provider ({e}). Falling back to LocalStorageProvider.")
     return LocalStorageProvider()

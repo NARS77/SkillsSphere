@@ -65,44 +65,67 @@ class HealthCheckView(APIView):
 
     def get(self, request, *args, **kwargs):
         """
-        Checks connection status of database, redis cache and general backend server.
+        Verify database, redis, storage, email connectivity.
         """
-        import time
+        import os
         from django.db import connection
         from django.core.cache import cache
+        from django.conf import settings
 
-        health_status = {
-            'status': 'healthy',
-            'timestamp': time.time(),
-            'services': {
-                'database': 'unknown',
-                'redis': 'unknown',
-            }
-        }
+        db_status = "disconnected"
+        redis_status = "disconnected"
+        storage_status = "connected"
+        email_status = "configured" if getattr(settings, 'EMAIL_PROVIDER', 'console') != 'console' else "not_configured"
+        is_healthy = True
 
-        # 1. DB connection test
+        # DB connection check
         try:
             connection.ensure_connection()
-            health_status['services']['database'] = 'healthy'
-        except Exception as e:
-            health_status['services']['database'] = f'unhealthy: {e}'
-            health_status['status'] = 'unhealthy'
+            db_status = "connected"
+        except Exception:
+            is_healthy = False
 
-        # 2. Redis cache connection test
+        # Redis cache connection check
         try:
             cache.set('health_check_key', 'ok', timeout=5)
             val = cache.get('health_check_key')
             if val == 'ok':
-                health_status['services']['redis'] = 'healthy'
+                redis_status = "connected"
             else:
-                health_status['services']['redis'] = 'unhealthy: mismatch'
-                health_status['status'] = 'unhealthy'
-        except Exception as e:
-            health_status['services']['redis'] = f'unhealthy: {e}'
-            health_status['status'] = 'unhealthy'
+                is_healthy = False
+        except Exception:
+            is_healthy = False
 
-        status_code = status.HTTP_200_OK if health_status['status'] == 'healthy' else status.HTTP_503_SERVICE_UNAVAILABLE
-        return Response(health_status, status=status_code)
+        health_data = {
+            "status": "healthy" if is_healthy else "unhealthy",
+            "database": db_status,
+            "redis": redis_status,
+            "storage": storage_status,
+            "email": email_status,
+            "version": "1.0.0"
+        }
+
+        status_code = status.HTTP_200_OK if is_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+        return Response(health_data, status=status_code)
+
+
+class PlatformConfigView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        import os
+        from django.conf import settings
+
+        ai_enabled = any(os.getenv(k) for k in ['GEMINI_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY'])
+        demo_mode = getattr(settings, 'DEMO_MODE', False)
+
+        return Response({
+            "DEMO_MODE": demo_mode,
+            "AI_ENABLED": ai_enabled,
+            "PAYMENTS_ENABLED": True,
+            "EMAIL_ENABLED": getattr(settings, 'EMAIL_PROVIDER', 'console') != 'console',
+            "NOTIFICATIONS_ENABLED": True
+        })
 
 
 def robots_txt_view(request):

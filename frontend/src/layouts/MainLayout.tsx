@@ -6,13 +6,25 @@ import { Button } from '../components/ui/Button';
 import { User, LogOut, Menu, X, BookOpen, LayoutDashboard, Settings, Shield } from 'lucide-react';
 import { GlobalSearch } from '../components/layout/GlobalSearch';
 import { ThemeToggle } from '../components/layout/ThemeToggle';
+import { useConfigStore } from '../store/configStore';
+import { GuidedTour } from '../components/ui/GuidedTour';
 
 export const MainLayout: React.FC = () => {
   const { user, isAuthenticated, clearSession } = useAuthStore();
+  const { DEMO_MODE } = useConfigStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const logoRedirectPath = isAuthenticated ? '/dashboard' : '/';
+  
+  const [isBannerDismissed, setIsBannerDismissed] = useState(() => {
+    return localStorage.getItem('demo_banner_dismissed') === 'true';
+  });
+
+  const handleDismissBanner = () => {
+    setIsBannerDismissed(true);
+    localStorage.setItem('demo_banner_dismissed', 'true');
+  };
 
   // Close mobile menu when URL changes
   useEffect(() => {
@@ -38,6 +50,29 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
+      <GuidedTour />
+      
+      {/* Demo Banner */}
+      {DEMO_MODE && !isBannerDismissed && (
+        <div className="w-full bg-indigo-50 dark:bg-indigo-950/20 border-b border-indigo-200/40 dark:border-indigo-900/40 px-4 py-2 text-xs flex justify-between items-center text-indigo-700 dark:text-indigo-300 font-light select-none z-50">
+          <div className="flex items-center gap-2 max-w-2xl text-left">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-600 text-white uppercase tracking-wider shrink-0">
+              🎓 SkillSphere Demo
+            </span>
+            <p className="leading-normal">
+              You are exploring a public demo of SkillSphere. Some destructive operations are disabled.
+            </p>
+          </div>
+          <button 
+            onClick={handleDismissBanner} 
+            className="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200 transition-colors p-1 cursor-pointer"
+            aria-label="Dismiss banner"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 dark:border-slate-900/60 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

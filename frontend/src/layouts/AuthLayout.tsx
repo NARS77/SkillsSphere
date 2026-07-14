@@ -1,10 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Sparkles, Brain, Award } from 'lucide-react';
+import { Sparkles, Brain, Award, X } from 'lucide-react';
+import { useConfigStore } from '../store/configStore';
 
 export const AuthLayout: React.FC = () => {
+  const { DEMO_MODE } = useConfigStore();
+  const [isBannerDismissed, setIsBannerDismissed] = useState(() => {
+    return localStorage.getItem('demo_banner_dismissed') === 'true';
+  });
+
+  const handleDismissBanner = () => {
+    setIsBannerDismissed(true);
+    localStorage.setItem('demo_banner_dismissed', 'true');
+  };
+
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      {/* Demo Banner */}
+      {DEMO_MODE && !isBannerDismissed && (
+        <div className="w-full bg-indigo-50 dark:bg-indigo-950/20 border-b border-indigo-200/40 dark:border-indigo-900/40 px-4 py-2 text-xs flex justify-between items-center text-indigo-700 dark:text-indigo-300 font-light select-none z-50">
+          <div className="flex items-center gap-2 max-w-2xl text-left">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-600 text-white uppercase tracking-wider shrink-0">
+              🎓 SkillSphere Demo
+            </span>
+            <p className="leading-normal">
+              You are exploring a public demo of SkillSphere. Some destructive operations are disabled.
+            </p>
+          </div>
+          <button 
+            onClick={handleDismissBanner} 
+            className="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200 transition-colors p-1 cursor-pointer"
+            aria-label="Dismiss banner"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      
+      <div className="flex-1 flex">
       {/* Brand panel - visible on large screens */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-950 overflow-hidden items-center justify-center p-12">
         {/* Grid pattern overlay */}
@@ -72,6 +105,7 @@ export const AuthLayout: React.FC = () => {
           </div>
           <Outlet />
         </div>
+      </div>
       </div>
     </div>
   );

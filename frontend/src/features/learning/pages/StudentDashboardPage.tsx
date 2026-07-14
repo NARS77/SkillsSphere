@@ -197,7 +197,7 @@ export const StudentDashboardPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
       {/* Top Banner Dashboard Intro */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-indigo-650 text-white p-8 rounded-xl relative overflow-hidden border border-indigo-750/30">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-indigo-600 text-white p-8 rounded-xl relative overflow-hidden border border-indigo-700/30">
         <div className="space-y-1 relative z-10">
           <h1 className="text-lg sm:text-xl font-bold tracking-tight">
             Welcome back, {user?.first_name || user?.username || 'Learner'}!
@@ -207,7 +207,7 @@ export const StudentDashboardPage: React.FC = () => {
           </p>
         </div>
         <div className="relative z-10 shrink-0">
-          <Button variant="secondary" onClick={() => navigate('/courses')} className="bg-white text-indigo-650 hover:bg-slate-50 border-0 font-bold shadow-sm">
+          <Button variant="secondary" onClick={() => navigate('/courses')} className="bg-white text-indigo-600 hover:bg-slate-50 border-0 font-bold shadow-sm">
             Browse More Courses
             <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
           </Button>
@@ -736,7 +736,7 @@ export const StudentDashboardPage: React.FC = () => {
                   <span className="text-[9px] uppercase text-slate-400 font-bold block mt-1">Learning Streak</span>
                 </div>
                 <div className="text-center">
-                  <span className="text-xs font-bold text-indigo-650 dark:text-indigo-400 flex items-center gap-1 justify-center">
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 justify-center">
                     <Activity className="h-4.5 w-4.5" />
                     Active
                   </span>

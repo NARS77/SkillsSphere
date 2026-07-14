@@ -9,9 +9,11 @@ import { toast } from '../../../store/toastStore';
 import { triggerConfetti } from '../../../components/ui/Confetti';
 import { ShieldCheck, CreditCard, Ticket, CheckCircle, FileText, ArrowRight } from 'lucide-react';
 import { PageLoader } from '../../../components/ui/PageLoader';
+import { useConfigStore } from '../../../store/configStore';
 
 export const CheckoutPage: React.FC = () => {
     const { courseId } = useParams<{ courseId: string }>();
+    const { DEMO_MODE } = useConfigStore();
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any | null>(null);
     const [paymentProvider, setPaymentProvider] = useState<'MOCK' | 'STRIPE' | 'RAZORPAY'>('MOCK');
@@ -183,32 +185,42 @@ export const CheckoutPage: React.FC = () => {
                     {/* Payment methods */}
                     <Card className="p-6 space-y-4">
                         <h2 className="text-base font-bold text-slate-950 dark:text-white">Select Payment Provider</h2>
-                        <div className="grid grid-cols-3 gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setPaymentProvider('MOCK')}
-                                className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'MOCK' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
-                            >
-                                <CreditCard className="h-6 w-6 text-brand-600" />
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Mock Pay</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPaymentProvider('STRIPE')}
-                                className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'STRIPE' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
-                            >
-                                <CreditCard className="h-6 w-6 text-indigo-600" />
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Stripe</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPaymentProvider('RAZORPAY')}
-                                className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'RAZORPAY' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
-                            >
-                                <CreditCard className="h-6 w-6 text-emerald-600" />
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Razorpay</span>
-                            </button>
-                        </div>
+                        {DEMO_MODE ? (
+                            <div className="p-4 border border-indigo-200 bg-indigo-50/10 dark:border-indigo-900/40 dark:bg-indigo-950/5 rounded-2xl flex items-center gap-3">
+                                <CreditCard className="h-6 w-6 text-indigo-600 shrink-0" />
+                                <div className="space-y-0.5 text-left">
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Simulated Demo Checkout Active</span>
+                                    <span className="text-[10px] text-slate-500 block">Payments are simulated for demonstration. No real currency is processed.</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentProvider('MOCK')}
+                                    className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'MOCK' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
+                                >
+                                    <CreditCard className="h-6 w-6 text-brand-600" />
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Mock Pay</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentProvider('STRIPE')}
+                                    className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'STRIPE' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
+                                >
+                                    <CreditCard className="h-6 w-6 text-indigo-600" />
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Stripe</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentProvider('RAZORPAY')}
+                                    className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 ${paymentProvider === 'RAZORPAY' ? 'border-brand-600 bg-brand-50/20 dark:bg-brand-950/10' : ''}`}
+                                >
+                                    <CreditCard className="h-6 w-6 text-emerald-600" />
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Razorpay</span>
+                                </button>
+                            </div>
+                        )}
                     </Card>
                 </div>
 

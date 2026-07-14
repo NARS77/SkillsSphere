@@ -231,7 +231,7 @@ CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_TASK_ALWAYS_EAGER', str(DEBUG)).low
 
 
 # Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 1025))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False').lower() == 'true'
@@ -309,3 +309,24 @@ LOGGING = {
         },
     }
 }
+
+# ==========================================
+# Demo Mode & Deployment Settings
+# ==========================================
+DEMO_MODE = os.getenv('DEMO_MODE', 'False').lower() == 'true'
+
+# Enforce middleware in all environments
+MIDDLEWARE.append('apps.core.middleware.DemoModeMiddleware')
+
+# Cloudinary Integration for Media Assets
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
+if CLOUDINARY_URL:
+    # Inject before other apps to override static/media backends
+    INSTALLED_APPS.insert(0, 'cloudinary')
+    INSTALLED_APPS.insert(0, 'cloudinary_storage')
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Email Adapter Settings
+EMAIL_PROVIDER = os.getenv('EMAIL_PROVIDER', 'smtp')
+RESEND_API_KEY = os.getenv('EMAIL_API_KEY') or os.getenv('RESEND_API_KEY')
+

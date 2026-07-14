@@ -20,8 +20,11 @@ def api_root(request):
         }
     })
 
+from apps.core.views import HealthCheckView
+
 urlpatterns = [
     path('', api_root, name='api_root'),
+    path('health/', HealthCheckView.as_view(), name='root-health-check'),
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('apps.authentication.urls')),
     path('api/v1/', include('apps.courses.urls')),

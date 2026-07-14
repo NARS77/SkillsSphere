@@ -27,6 +27,7 @@ export const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -35,6 +36,11 @@ export const LoginPage: React.FC = () => {
       password: '',
     },
   });
+
+  const fillCredentials = (email: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', 'Demo@123', { shouldValidate: true });
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
@@ -135,6 +141,38 @@ export const LoginPage: React.FC = () => {
           Sign up
         </Link>
       </div>
+
+      {import.meta.env.VITE_DEMO_MODE === 'true' && (
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800/80 space-y-3 text-left">
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">1-Click Auto-Fill Demo Accounts</span>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => fillCredentials('student@skillsphere.demo')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200/60 dark:border-slate-850 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 text-[11px] font-bold transition-all text-slate-700 dark:text-slate-350 cursor-pointer"
+            >
+              <span>🎓 Log in as Student</span>
+              <span className="text-[9px] font-mono text-slate-400">student@skillsphere.demo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => fillCredentials('instructor@skillsphere.demo')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200/60 dark:border-slate-850 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 text-[11px] font-bold transition-all text-slate-700 dark:text-slate-355 cursor-pointer"
+            >
+              <span>🏫 Log in as Instructor</span>
+              <span className="text-[9px] font-mono text-slate-400">instructor@skillsphere.demo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => fillCredentials('admin@skillsphere.demo')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200/60 dark:border-slate-850 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 text-[11px] font-bold transition-all text-slate-700 dark:text-slate-355 cursor-pointer"
+            >
+              <span>🔑 Log in as Admin</span>
+              <span className="text-[9px] font-mono text-slate-400">admin@skillsphere.demo</span>
+            </button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
