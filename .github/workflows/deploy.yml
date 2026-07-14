@@ -48,10 +48,15 @@ jobs:
 
       - name: Run Migrations and Tests
         env:
-          DATABASE_URL: postgres://skillsphere_user:skillsphere_password@localhost:5432/skillsphere_db
+          DB_ENGINE: django.db.backends.postgresql
+          DB_NAME: skillsphere_db
+          DB_USER: skillsphere_user
+          DB_PASSWORD: skillsphere_password
+          DB_HOST: localhost
+          DB_PORT: 5432
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: ci-test-secret-key-12345
-          DEBUG: 'False'
+          DEBUG: 'True'
         run: |
           cd backend
           python manage.py migrate
